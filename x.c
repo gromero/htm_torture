@@ -4,9 +4,17 @@
 #include <inttypes.h>
 #include <altivec.h>
 #include <pthread.h>
+#include "x.h"
 
 #define _ asm
 #define THREADS 3
+#define NR_WORKLOADS 3
+
+extern void workload0();
+extern void workload1();
+extern void workload2();
+
+void (*workloads[2])();
 
 void *worker(void *arg)
 {
@@ -19,6 +27,12 @@ void *worker(void *arg)
  vector __int128 vmx_correct_value[32];
  vector __int128 vmx_scratch_area[2];
 
+ unsigned long int tid = pthread_self();
+
+ int work = tid % NR_WORKLOADS;
+
+ printf("Thread executing Workload # %d\n", work);
+
  vmx_correct_value[0] = (vector __int128) {0xC0DE};
  vmx_correct_value[1] = (vector __int128) {0xC1DE};
 
@@ -28,6 +42,7 @@ void *worker(void *arg)
  //vmx0 = (vector __int128) {0xC0DE};
  vmx1 = vmx0;
 
+ 
  _ ("tbegin.  \n\t");
  _ goto ("beq %l[_failure] \n\t" : : : : _failure);
 
@@ -35,7 +50,10 @@ void *worker(void *arg)
  // vmx0 = (vector __int128) {0xBABE};
 
  // Force all transactional code to abort.
- _ ("tabort. 0 \n\t");
+ // _ ("tabort. 0 \n\t");
+
+ // Execute a workload depending on the thread;
+ (*workloads[work])();
 
  _ ("tend.    \n\t");
 
@@ -88,7 +106,13 @@ void start_threads(uint64_t threads){
 
 
 }
+void set_workloads(){
+	workloads[0] = workload0;
+	workloads[1] = workload1;
+	workloads[2] = workload2;
+}
 
+	
 int main(int argc, char **argv) {
 	uint64_t threads;
 
@@ -98,6 +122,8 @@ int main(int argc, char **argv) {
 		threads = THREADS;
 
 	printf("Starting %"PRIu64 " threads\n", threads);
+
+	set_workloads();
 
 	start_threads(threads);
 

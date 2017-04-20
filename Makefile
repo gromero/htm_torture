@@ -1,2 +1,2 @@
 all:
-	gcc x.c -lpthread
+	gcc x.c workload.c -lpthread
