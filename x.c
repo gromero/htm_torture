@@ -6,14 +6,6 @@
 #include <pthread.h>
 #include "x.h"
 
-#define _ asm
-#define THREADS 3
-#define NR_WORKLOADS 3
-
-extern void workload0();
-extern void workload1();
-extern void workload2();
-
 void (*workloads[2])();
 
 void *worker(void *arg)
@@ -29,9 +21,11 @@ void *worker(void *arg)
 
  unsigned long int tid = pthread_self();
 
- int work = tid % NR_WORKLOADS;
+ int work = tid % (MAX_WORKLOADS + 1);
 
+#ifdef DEBUG
  printf("Thread executing Workload # %d\n", work);
+#endif
 
  vmx_correct_value[0] = (vector __int128) {0xC0DE};
  vmx_correct_value[1] = (vector __int128) {0xC1DE};
@@ -39,10 +33,14 @@ void *worker(void *arg)
  vmx0 = vmx_correct_value[0]; 
 
  vmx0 = (vector __int128) {0xBEEF};
- //vmx0 = (vector __int128) {0xC0DE};
  vmx1 = vmx0;
 
- 
+#ifdef DEBUG
+ printf("Starting workload %d\n", work);
+#endif
+
+
+/* Start the transaction here */
  _ ("tbegin.  \n\t");
  _ goto ("beq %l[_failure] \n\t" : : : : _failure);
 
@@ -110,6 +108,9 @@ void set_workloads(){
 	workloads[0] = workload0;
 	workloads[1] = workload1;
 	workloads[2] = workload2;
+	workloads[3] = workload3;
+	workloads[4] = workload4;
+	workloads[5] = workload5;
 }
 
 	
