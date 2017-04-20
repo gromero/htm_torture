@@ -3,10 +3,12 @@
 #include <string.h>
 #include <inttypes.h>
 #include <altivec.h>
+#include <pthread.h>
 
 #define _ asm
+#define THREADS 3
 
-int main(int argc, char **argv)
+void *worker(void *arg)
 {
  register vector __int128 vsx0 asm ("vs0");
  register vector __int128 vsx1 asm ("vs1");
@@ -71,4 +73,33 @@ _value_match:
 _success:
 	printf("HTM succeeded\n");
 	exit(0);
+}
+
+void start_threads(uint64_t threads){
+	pthread_t thread[threads];
+
+	for (uint64_t i = 0; i < threads; i++)
+		pthread_create(&thread[i], NULL, &worker,  NULL);
+
+	//wait threads
+
+	for (int i = 0; i < threads; i++)
+		pthread_join(thread[i], NULL);
+
+
+}
+
+int main(int argc, char **argv) {
+	uint64_t threads;
+
+	if (argc == 2)
+		threads = atoi(argv[1]);
+	else
+		threads = THREADS;
+
+	printf("Starting %"PRIu64 " threads\n", threads);
+
+	start_threads(threads);
+
+	return 0;
 }

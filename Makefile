@@ -1,2 +1,2 @@
 all:
-	gcc x.c
+	gcc x.c -lpthread
