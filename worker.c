@@ -118,7 +118,7 @@ void *worker(void *arg)
 
  unsigned long int tid = pthread_self();
 
- int work = tid % (MAX_WORKLOADS + 1);
+ int work = tid % nr_workloads;
 
 #ifdef DEBUG
  printf("Thread executing Workload # %d\n", work);
