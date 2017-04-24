@@ -18,6 +18,8 @@ extern void workload5();
 
 // Array of workloads functions
 void (*workloads[MAX_WORKLOADS])();
+
+// not TLS (.bss)
 int nr_workloads;
 
 extern void start_threads(uint64_t threads);

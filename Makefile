@@ -5,18 +5,19 @@ DEBUG = -O0 -g
 %.o: %.c $(DEPS)
 	$(CC) $(DEBUG) -c -o $@ $< $(CFLAGS)
 
-x: worker.o x.o workload.o threads.o
-	$(CC) $(DEBUG) worker.o x.o workload.o threads.o $(LDFLAGS) 
+torture: worker.o torture.o workload.o threads.o
+	$(CC) $(DEBUG) -o torture worker.o torture.o workload.o threads.o $(LDFLAGS)
 
 asm:
-	gcc -S -fverbose-asm worker.c x.c workload.c threads.c
+	gcc -S -fverbose-asm worker.c torture.c workload.c threads.c
 
 z: z.c
 	$(CC) $(DEBUG) z.c -o z
 
-all: x
+all: torture
 
 clean:
-	rm *.o
-	rm a.out
-	rm z
+	rm -f *.o
+	rm -f a.out
+	rm -f z
+	rm -fr torture
