@@ -8,6 +8,9 @@ DEBUG = -g
 x: worker.o x.o workload.o threads.o
 	$(CC) $(DEBUG) worker.o x.o workload.o threads.o $(LDFLAGS) 
 
+asm:
+	gcc -S -fverbose-asm worker.c x.c workload.c threads.c
+
 z: z.c
 	$(CC) $(DEBUG) z.c -o z
 
