@@ -7,6 +7,10 @@
 #define _ asm
 #define __ volatile
 
+void workload0() {
+        printf("Workload 0\n");
+}
+
 int main(int argc, char **argv)
 {
  // VSX registers. To be used in the future.
@@ -130,7 +134,7 @@ int main(int argc, char **argv)
  // vmx0 = (vector __int128) {0xBABE};
 
  // Force all transactional code to abort.
-  printf("c");
+workload0();
  //_ ("tabort. 0 \n\t");
 
  _ ("tend.    \n\t");
