@@ -25,6 +25,7 @@ void set_workloads(){
 
 	
 int main(int argc, char **argv) {
+	uint64_t threads;
 	uint64_t repeat;
 
 	if (argc == 2)
