@@ -1,6 +1,6 @@
 LDFLAGS = -lpthread
 CC = gcc
-DEBUG = -g
+DEBUG = -O0 -g
 
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
