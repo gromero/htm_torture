@@ -2,16 +2,17 @@
 #include<inttypes.h>
 #include "x.h"
 
+/* Abort due to syscall (printf); */
+void workload0() {
+	printf("Workload 0\n");
+}
+
+/* ----------- */
 int fib(int x){
 	if (x == 2 || x == 1)
 		return 1;
 
 	return fib(x-1) + fib(x-2);
-}
-
-/* Abort due to syscall (printf); */
-void workload0() {
-	printf("Workload 0\n");
 }
 
 /* Run a fibonnaci of 40 inside transaction */
@@ -23,16 +24,19 @@ void workload1() {
 	printf("Workload 1\n");
 }
 
+/* ----------- */
 /* single nop  inside a transaction */
 void workload2() {
 	_ ("or 0,0,0 \n");
 }
 
+/* ----------- */
 /* Calling tabort inside transaction */
 void workload3() {
 	_ ("tabort.  0\n");
 }
 
+/* ----------- */
 /* Quick sort workload */
 void quicksort(int *A, int len)
 {
@@ -57,14 +61,19 @@ void quicksort(int *A, int len)
   quicksort(A + i, len - i);
 }
 
+/* ----------- */
 void workload4() {
-	int a[] = {12, 3, 9, 4, 9, 64};
+	int a[] = {12, 3}; //, 9, 4, 9, 64};
 	int n = sizeof a / sizeof a[0];
 	quicksort(a, n);
 }
 
+/* ----------- */
 /* abort due to illegal instruction */
 void workload5() {
 // Causing a illegal instruction and causing a segfault
 //	_ (".long 0x0	\n");
+	int i ;
+	for (i=0; i < 10; )
+		i++;
 }

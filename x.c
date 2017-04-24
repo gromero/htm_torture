@@ -6,7 +6,9 @@
 #include <pthread.h>
 #include "x.h"
 
-void (*workloads[2])();
+// Array of workloads functions
+void (*workloads[MAX_WORKLOADS])();
+int nr_workloads;
 
 void *worker(void *arg)
 {
@@ -21,7 +23,7 @@ void *worker(void *arg)
 
  unsigned long int tid = pthread_self();
 
- int work = tid % (MAX_WORKLOADS + 1);
+ int work = tid % (nr_workloads);
 
 #ifdef DEBUG
  printf("Thread executing Workload # %d\n", work);
@@ -38,7 +40,6 @@ void *worker(void *arg)
 #ifdef DEBUG
  printf("Starting workload %d\n", work);
 #endif
-
 
 /* Start the transaction here */
  _ ("tbegin.  \n\t");
@@ -84,33 +85,49 @@ _value_mismatch:
 //
 _value_match:
 	printf("HTM failed but VMX registers are OK\n");
-	exit(1);
 
 _success:
 	printf("HTM succeeded\n");
-	exit(0);
 }
 
 void start_threads(uint64_t threads){
 	pthread_t thread[threads];
 
+#ifdef DEBUG
+	printf("Creating %"PRIu64" threads\n", threads);
+#endif
+
 	for (uint64_t i = 0; i < threads; i++)
 		pthread_create(&thread[i], NULL, &worker,  NULL);
 
-	//wait threads
-
+#ifdef DEBUG
+	printf("Waiting %"PRIu64" threads to finish\n", threads);
+#endif
 	for (int i = 0; i < threads; i++)
 		pthread_join(thread[i], NULL);
-
-
 }
+
+void register_workload(void *func){
+	int i = 0;
+	while (workloads[i] != NULL)
+		i++;
+	workloads[i] = func;
+	nr_workloads++;
+	#ifdef DEBUG
+	printf("Registering workload %d\n", nr_workloads);
+	#endif
+}
+
 void set_workloads(){
-	workloads[0] = workload0;
-	workloads[1] = workload1;
-	workloads[2] = workload2;
-	workloads[3] = workload3;
-	workloads[4] = workload4;
-	workloads[5] = workload5;
+	memset(workloads, 0, MAX_WORKLOADS);
+	nr_workloads = 0;
+
+	register_workload(workload0);
+	register_workload(workload1);
+	register_workload(workload2);
+	register_workload(workload3);
+	register_workload(workload4);
+	register_workload(workload5);
 }
 
 	
