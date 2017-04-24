@@ -1,4 +1,4 @@
-#include "x.h"
+#include "torture.h"
 
 void register_workload(void *func){
 	int i = 0;

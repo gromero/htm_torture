@@ -1,6 +1,6 @@
 #include<stdio.h>
 #include<inttypes.h>
-#include "x.h"
+#include "torture.h"
 
 /* Abort due to syscall (printf); */
 void workload0() {
