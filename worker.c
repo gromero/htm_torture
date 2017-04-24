@@ -127,18 +127,6 @@ void *worker(void *arg)
  printf("Thread executing Workload # %d\n", work);
 #endif
 
- vmx_correct_value[0] = (vector __int128) {0xC0DE};
- vmx_correct_value[1] = (vector __int128) {0xC1DE};
-
- vmx0 = vmx_correct_value[0]; 
-
- vmx0 = (vector __int128) {0xBEEF};
- vmx1 = vmx0;
-
-#ifdef DEBUG
- printf("Starting workload %d\n", work);
-#endif
-
 /* Start the transaction here */
  _ ("tbegin.  \n\t");
  _ goto ("beq %l[_failure] \n\t" : : : : _failure);
@@ -158,7 +146,7 @@ _failure:
      "lvx  1, 0, %[vmx_correct_value]  \n\t"
      "vcmpequb. 0, 0, 1                \n\t"
      "lvx  1, 0,  %[vmx_scratch_area]  \n\t"
-     "mfvsrd 5, 0 \n\t"
+     "mfvrd 5, 0 \n\t"
      "li     6, 0 \n\t"
      "bc   4, 24, %l[_value_mismatch]  \n\t"
 
@@ -166,7 +154,7 @@ _failure:
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value]  \n\t"
      "vcmpequb. 0, 0, 1                \n\t"
-     "mfvsrd 5, 1 \n\t"
+     "mfvrd 5, 1 \n\t"
      "li     6, 1 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
@@ -174,7 +162,7 @@ _failure:
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value]  \n\t"
      "vcmpequb. 0, 0, 2                \n\t"
-     "mfvsrd 5, 2 \n\t"
+     "mfvrd 5, 2 \n\t"
      "li     6, 2 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
@@ -182,7 +170,7 @@ _failure:
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 3                \n\t"
-     "mfvsrd 5, 3 \n\t"
+     "mfvrd 5, 3 \n\t"
      "li     6, 3 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
@@ -190,7 +178,7 @@ _failure:
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 4                \n\t"
-     "mfvsrd 5, 4 \n\t"
+     "mfvrd 5, 4 \n\t"
      "li     6, 4 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
@@ -198,7 +186,7 @@ _failure:
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 5                \n\t"
-     "mfvsrd 5, 5 \n\t"
+     "mfvrd 5, 5 \n\t"
      "li     6, 5 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
@@ -206,7 +194,7 @@ _failure:
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 6                \n\t"
-     "mfvsrd 5, 6 \n\t"
+     "mfvrd 5, 6 \n\t"
      "li     6, 6 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
@@ -214,7 +202,7 @@ _failure:
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 7                \n\t"
-     "mfvsrd 5, 7 \n\t"
+     "mfvrd 5, 7 \n\t"
      "li     6, 7 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
@@ -222,7 +210,7 @@ _failure:
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 8                \n\t"
-     "mfvsrd 5, 8 \n\t"
+     "mfvrd 5, 8 \n\t"
      "li     6, 8 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
@@ -230,7 +218,7 @@ _failure:
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 9                \n\t"
-     "mfvsrd 5, 9 \n\t"
+     "mfvrd 5, 9 \n\t"
      "li     6, 9 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
@@ -238,7 +226,7 @@ _failure:
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 10               \n\t"
-     "mfvsrd 5, 10 \n\t"
+     "mfvrd 5, 10 \n\t"
      "li     6, 10 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
@@ -246,7 +234,7 @@ _failure:
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 11               \n\t"
-     "mfvsrd 5, 11 \n\t"
+     "mfvrd 5, 11 \n\t"
      "li     6, 11 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
@@ -254,7 +242,7 @@ _failure:
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 12                \n\t"
-     "mfvsrd 5, 12 \n\t"
+     "mfvrd 5, 12 \n\t"
      "li     6, 12 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
@@ -262,7 +250,7 @@ _failure:
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 13               \n\t"
-     "mfvsrd 5, 13 \n\t"
+     "mfvrd 5, 13 \n\t"
      "li     6, 13 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
@@ -270,7 +258,7 @@ _failure:
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 14               \n\t"
-     "mfvsrd 5, 14 \n\t"
+     "mfvrd 5, 14 \n\t"
      "li     6, 14 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
@@ -278,7 +266,7 @@ _failure:
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 15               \n\t"
-     "mfvsrd 5, 15 \n\t"
+     "mfvrd 5, 15 \n\t"
      "li     6, 15 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
@@ -286,7 +274,7 @@ _failure:
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 16               \n\t"
-     "mfvsrd 5, 16 \n\t"
+     "mfvrd 5, 16 \n\t"
      "li     6, 16 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
@@ -294,7 +282,7 @@ _failure:
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 17               \n\t"
-     "mfvsrd 5, 17 \n\t"
+     "mfvrd 5, 17 \n\t"
      "li     6, 17 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
@@ -302,7 +290,7 @@ _failure:
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 18               \n\t"
-     "mfvsrd 5, 18 \n\t"
+     "mfvrd 5, 18 \n\t"
      "li     6, 18 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
@@ -310,7 +298,7 @@ _failure:
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 19               \n\t"
-     "mfvsrd 5, 19 \n\t"
+     "mfvrd 5, 19 \n\t"
      "li     6, 19 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
@@ -318,7 +306,7 @@ _failure:
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 20               \n\t"
-     "mfvsrd 5, 20 \n\t"
+     "mfvrd 5, 20 \n\t"
      "li     6, 20 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
@@ -326,7 +314,7 @@ _failure:
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 21               \n\t"
-     "mfvsrd 5, 21 \n\t"
+     "mfvrd 5, 21 \n\t"
      "li     6, 21 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
@@ -334,7 +322,7 @@ _failure:
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 22               \n\t"
-     "mfvsrd 5, 22 \n\t"
+     "mfvrd 5, 22 \n\t"
      "li     6, 22 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
@@ -342,7 +330,7 @@ _failure:
      "addi %[offset], %[offset], 16    \n\t" 
      "lvx  0, %[offset], %[vmx_correct_value] \n\t" 
      "vcmpequb. 0, 0, 23               \n\t" 
-     "mfvsrd 5, 23 \n\t"
+     "mfvrd 5, 23 \n\t"
      "li     6, 23 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t" 
  
@@ -350,7 +338,7 @@ _failure:
      "addi %[offset], %[offset], 16    \n\t" 
      "lvx  0, %[offset], %[vmx_correct_value] \n\t" 
      "vcmpequb. 0, 0, 24               \n\t" 
-     "mfvsrd 5, 24 \n\t"
+     "mfvrd 5, 24 \n\t"
      "li     6, 24 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t" 
  
@@ -358,7 +346,7 @@ _failure:
      "addi %[offset], %[offset], 16    \n\t" 
      "lvx  0, %[offset], %[vmx_correct_value] \n\t" 
      "vcmpequb. 0, 0, 25               \n\t" 
-     "mfvsrd 5, 25 \n\t"
+     "mfvrd 5, 25 \n\t"
      "li     6, 25 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t" 
  
@@ -366,7 +354,7 @@ _failure:
      "addi %[offset], %[offset], 16    \n\t" 
      "lvx  0, %[offset], %[vmx_correct_value] \n\t" 
      "vcmpequb. 0, 0, 26               \n\t" 
-     "mfvsrd 5, 26 \n\t"
+     "mfvrd 5, 26 \n\t"
      "li     6, 26 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t" 
  
@@ -374,7 +362,7 @@ _failure:
      "addi %[offset], %[offset], 16    \n\t" 
      "lvx  0, %[offset], %[vmx_correct_value] \n\t" 
      "vcmpequb. 0, 0, 27                \n\t" 
-     "mfvsrd 5, 27 \n\t"
+     "mfvrd 5, 27 \n\t"
      "li     6, 27 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t" 
  
@@ -382,7 +370,7 @@ _failure:
      "addi %[offset], %[offset], 16    \n\t" 
      "lvx  0, %[offset], %[vmx_correct_value] \n\t" 
      "vcmpequb. 0, 0, 28               \n\t" 
-     "mfvsrd 5, 28 \n\t"
+     "mfvrd 5, 28 \n\t"
      "li     6, 28 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t" 
  
@@ -390,7 +378,7 @@ _failure:
      "addi %[offset], %[offset], 16    \n\t" 
      "lvx  0, %[offset], %[vmx_correct_value] \n\t" 
      "vcmpequb. 0, 0, 29               \n\t" 
-     "mfvsrd 5, 29 \n\t"
+     "mfvrd 5, 29 \n\t"
      "li     6, 29 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t" 
  
@@ -398,7 +386,7 @@ _failure:
      "addi %[offset], %[offset], 16    \n\t" 
      "lvx  0, %[offset], %[vmx_correct_value] \n\t" 
      "vcmpequb. 0, 0, 30               \n\t" 
-     "mfvsrd 5, 30 \n\t"
+     "mfvrd 5, 30 \n\t"
      "li     6, 30 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t" 
  
@@ -406,7 +394,7 @@ _failure:
      "addi %[offset], %[offset], 16    \n\t" 
      "lvx  0, %[offset], %[vmx_correct_value] \n\t" 
      "vcmpequb. 0, 0, 31               \n\t" 
-     "mfvsrd 5, 31 \n\t"
+     "mfvrd 5, 31 \n\t"
      "li     6, 31 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t" 
  
