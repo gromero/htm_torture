@@ -132,8 +132,7 @@ void *worker(void *arg)
  _ goto ("beq %l[_failure] \n\t" : : : : _failure);
 
  // Execute a workload depending on the thread;
- // (*workloads[work])();
- _ ("tabort. 12 \n\t");
+ (*workloads[work])();
 
  _ ("tend.    \n\t");
 
