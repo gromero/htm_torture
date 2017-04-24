@@ -1,6 +1,6 @@
 #include "x.h"
 
-void *worker(void *arg)
+void *worker1(void *arg)
 {
  register vector __int128 vsx0 asm ("vs0");
  register vector __int128 vsx1 asm ("vs1");
