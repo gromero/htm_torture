@@ -415,9 +415,15 @@ _value_mismatch:
 	exit(13);
 
 _value_match:
+	#ifdef DEBUG
 	printf("Work %d Result:\n", work);
 	printf("HTM failed but VMX registers are OK\n");
+	#endif
+	printf("!");
 
 _success:
+	printf(".");
+	#ifdef DEBUG
 	printf("HTM succeeded\n");
+	#endif
 }
