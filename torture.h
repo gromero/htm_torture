@@ -6,9 +6,9 @@
 #include <pthread.h>
 
 #define _ asm
-#define THREADS 5
-#define REPEAT 1024
-#define MAX_WORKLOADS 5
+#define THREADS 64
+#define REPEAT 1024*1024
+#define MAX_WORKLOADS 6
 
 extern void workload0();
 extern void workload1();
