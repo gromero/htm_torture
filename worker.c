@@ -120,6 +120,9 @@ void *worker(void *arg)
 
  int work = tid % nr_workloads;
 
+ uint64_t nr;
+ uint64_t res;
+
 #ifdef DEBUG
  printf("Thread executing Workload # %d\n", work);
 #endif
@@ -154,192 +157,256 @@ _failure:
      "lvx  1, 0, %[vmx_correct_value]  \n\t"
      "vcmpequb. 0, 0, 1                \n\t"
      "lvx  1, 0,  %[vmx_scratch_area]  \n\t"
+     "mfvsrd 5, 0 \n\t"
+     "li     6, 0 \n\t"
      "bc   4, 24, %l[_value_mismatch]  \n\t"
 
      // Check if vmx1 is sane.
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value]  \n\t"
      "vcmpequb. 0, 0, 1                \n\t"
+     "mfvsrd 5, 1 \n\t"
+     "li     6, 1 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
      // Check if vmx2 is sane.
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value]  \n\t"
      "vcmpequb. 0, 0, 2                \n\t"
+     "mfvsrd 5, 2 \n\t"
+     "li     6, 2 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
      // Check if vmx3 is sane.
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 3                \n\t"
+     "mfvsrd 5, 3 \n\t"
+     "li     6, 3 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
      // Check if vmx4 is sane.
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 4                \n\t"
+     "mfvsrd 5, 4 \n\t"
+     "li     6, 4 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
      // Check if vmx5 is sane.
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 5                \n\t"
+     "mfvsrd 5, 5 \n\t"
+     "li     6, 5 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
      // Check if vmx6 is sane.
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 6                \n\t"
+     "mfvsrd 5, 6 \n\t"
+     "li     6, 6 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
      // Check if vmx7 is sane.
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 7                \n\t"
+     "mfvsrd 5, 7 \n\t"
+     "li     6, 7 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
      // Check if vmx8 is sane.
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 8                \n\t"
+     "mfvsrd 5, 8 \n\t"
+     "li     6, 8 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
      // Check if vmx9 is sane.
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 9                \n\t"
+     "mfvsrd 5, 9 \n\t"
+     "li     6, 9 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
      // Check if vmx10 is sane.
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 10               \n\t"
+     "mfvsrd 5, 10 \n\t"
+     "li     6, 10 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
      // Check if vmx11 is sane.
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 11               \n\t"
+     "mfvsrd 5, 11 \n\t"
+     "li     6, 11 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
      // Check if vmx12 is sane.
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 12                \n\t"
+     "mfvsrd 5, 12 \n\t"
+     "li     6, 12 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
      // Check if vmx13 is sane.
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 13               \n\t"
+     "mfvsrd 5, 13 \n\t"
+     "li     6, 13 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
      // Check if vmx14 is sane.
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 14               \n\t"
+     "mfvsrd 5, 14 \n\t"
+     "li     6, 14 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
      // Check if vmx15 is sane.
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 15               \n\t"
+     "mfvsrd 5, 15 \n\t"
+     "li     6, 15 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
      // Check if vmx16 is sane.
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 16               \n\t"
+     "mfvsrd 5, 16 \n\t"
+     "li     6, 16 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
      // Check if vmx17 is sane.
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 17               \n\t"
+     "mfvsrd 5, 17 \n\t"
+     "li     6, 17 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
      // Check if vmx18 is sane.
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 18               \n\t"
+     "mfvsrd 5, 18 \n\t"
+     "li     6, 18 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
      // Check if vmx19 is sane.
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 19               \n\t"
+     "mfvsrd 5, 19 \n\t"
+     "li     6, 19 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
      // Check if vmx20 is sane.
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 20               \n\t"
+     "mfvsrd 5, 20 \n\t"
+     "li     6, 20 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
      // Check if vmx21 is sane.
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 21               \n\t"
+     "mfvsrd 5, 21 \n\t"
+     "li     6, 21 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
      // Check if vmx22 is sane.
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value] \n\t"
      "vcmpequb. 0, 0, 22               \n\t"
+     "mfvsrd 5, 22 \n\t"
+     "li     6, 22 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
      // Check if vmx23 is sane. 
      "addi %[offset], %[offset], 16    \n\t" 
      "lvx  0, %[offset], %[vmx_correct_value] \n\t" 
      "vcmpequb. 0, 0, 23               \n\t" 
+     "mfvsrd 5, 23 \n\t"
+     "li     6, 23 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t" 
  
      // Check if vmx24 is sane. 
      "addi %[offset], %[offset], 16    \n\t" 
      "lvx  0, %[offset], %[vmx_correct_value] \n\t" 
      "vcmpequb. 0, 0, 24               \n\t" 
+     "mfvsrd 5, 24 \n\t"
+     "li     6, 24 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t" 
  
      // Check if vmx25 is sane. 
      "addi %[offset], %[offset], 16    \n\t" 
      "lvx  0, %[offset], %[vmx_correct_value] \n\t" 
      "vcmpequb. 0, 0, 25               \n\t" 
+     "mfvsrd 5, 25 \n\t"
+     "li     6, 25 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t" 
  
      // Check if vmx26 is sane. 
      "addi %[offset], %[offset], 16    \n\t" 
      "lvx  0, %[offset], %[vmx_correct_value] \n\t" 
      "vcmpequb. 0, 0, 26               \n\t" 
+     "mfvsrd 5, 26 \n\t"
+     "li     6, 26 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t" 
  
      // Check if vmx27 is sane. 
      "addi %[offset], %[offset], 16    \n\t" 
      "lvx  0, %[offset], %[vmx_correct_value] \n\t" 
      "vcmpequb. 0, 0, 27                \n\t" 
+     "mfvsrd 5, 27 \n\t"
+     "li     6, 27 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t" 
  
      // Check if vmx28 is sane. 
      "addi %[offset], %[offset], 16    \n\t" 
      "lvx  0, %[offset], %[vmx_correct_value] \n\t" 
      "vcmpequb. 0, 0, 28               \n\t" 
+     "mfvsrd 5, 28 \n\t"
+     "li     6, 28 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t" 
  
      // Check if vmx29 is sane. 
      "addi %[offset], %[offset], 16    \n\t" 
      "lvx  0, %[offset], %[vmx_correct_value] \n\t" 
      "vcmpequb. 0, 0, 29               \n\t" 
+     "mfvsrd 5, 29 \n\t"
+     "li     6, 29 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t" 
  
      // Check if vmx30 is sane. 
      "addi %[offset], %[offset], 16    \n\t" 
      "lvx  0, %[offset], %[vmx_correct_value] \n\t" 
      "vcmpequb. 0, 0, 30               \n\t" 
+     "mfvsrd 5, 30 \n\t"
+     "li     6, 30 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t" 
  
      // Check if vmx31 is sane. 
      "addi %[offset], %[offset], 16    \n\t" 
      "lvx  0, %[offset], %[vmx_correct_value] \n\t" 
      "vcmpequb. 0, 0, 31               \n\t" 
+     "mfvsrd 5, 31 \n\t"
+     "li     6, 31 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t" 
  
      // Reach here, then all registers are sane. 
@@ -354,10 +421,15 @@ _failure:
      );
 
 _value_mismatch:
-        printf("HTM failed and VMX registers got corrupted!\n");
+	_ ("mr 5, %[nr] \n\t": [nr] "=r"(nr) : :);
+	_ ("mr 6, %[res] \n\t": [res] "=r"(res) : :);
+
+	printf("Work %d Result for %"PRIu64 " and %"PRIu64" :\n", work, nr, res);
+	printf("HTM failed and VMX registers got corrupted!\n");
 	exit(13);
 
 _value_match:
+	printf("Work %d Result:\n", work);
 	printf("HTM failed but VMX registers are OK\n");
 
 _success:
