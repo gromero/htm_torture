@@ -422,8 +422,8 @@ _failure:
      );
 
 _value_mismatch:
-	_ ("mr %[nr], 5 \n\t": [nr] "=r"(nr) : :);
-	_ ("mr %[res], 6 \n\t": [res] "=r"(res) : :);
+	_ ("mr %[nr], 6 \n\t": [nr] "=r"(nr) : :);
+	_ ("mr %[res], 5 \n\t": [res] "=r"(res) : :);
 
 	printf("Work %d. Register vs%"PRIu64 " contains value %"PRIx64" :\n", work, nr, res);
 	printf("HTM failed and VMX registers got corrupted!\n");

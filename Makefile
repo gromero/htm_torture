@@ -1,9 +1,9 @@
 LDFLAGS = -lpthread
 CC = gcc
-DEBUG = -g
+DEBUG = -O0 -g
 
 %.o: %.c $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CC) $(DEBUG) -c -o $@ $< $(CFLAGS)
 
 x: worker.o x.o workload.o threads.o
 	$(CC) $(DEBUG) worker.o x.o workload.o threads.o $(LDFLAGS) 
