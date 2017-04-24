@@ -116,9 +116,7 @@ void *worker(void *arg)
  vmx30 = (vector __int128) {0xBEEF};
  vmx31 = (vector __int128) {0xBEEF};
 
- unsigned long int tid = pthread_self();
-
- int work = tid % nr_workloads;
+ int work = rand() % (nr_workloads - 1);
 
  uint64_t nr;
  uint64_t res;

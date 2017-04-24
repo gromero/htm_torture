@@ -69,10 +69,8 @@ void workload4() {
 }
 
 /* ----------- */
-/* abort due to illegal instruction */
+/* loop */
 void workload5() {
-// Causing a illegal instruction and causing a segfault
-//	_ (".long 0x0	\n");
 	int i ;
 	for (i=0; i < 10; )
 		i++;
