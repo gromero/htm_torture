@@ -7,6 +7,7 @@
 
 #define _ asm
 #define THREADS 5
+#define REPEAT 1024
 #define MAX_WORKLOADS 5
 
 extern void workload0();

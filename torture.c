@@ -25,7 +25,7 @@ void set_workloads(){
 
 	
 int main(int argc, char **argv) {
-	uint64_t threads;
+	uint64_t repeat;
 
 	if (argc == 2)
 		threads = atoi(argv[1]);
@@ -36,7 +36,8 @@ int main(int argc, char **argv) {
 
 	set_workloads();
 
-	start_threads(threads);
+	for (int i = 0; i < REPEAT; i++)
+		start_threads(threads);
 
 	return 0;
 }
