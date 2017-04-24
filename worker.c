@@ -144,7 +144,8 @@ void *worker(void *arg)
  _ goto ("beq %l[_failure] \n\t" : : : : _failure);
 
  // Execute a workload depending on the thread;
- (*workloads[work])();
+ // (*workloads[work])();
+ _ ("tabort. 12 \n\t");
 
  _ ("tend.    \n\t");
 
@@ -421,10 +422,10 @@ _failure:
      );
 
 _value_mismatch:
-	_ ("mr 5, %[nr] \n\t": [nr] "=r"(nr) : :);
-	_ ("mr 6, %[res] \n\t": [res] "=r"(res) : :);
+	_ ("mr %[nr], 5 \n\t": [nr] "=r"(nr) : :);
+	_ ("mr %[res], 6 \n\t": [res] "=r"(res) : :);
 
-	printf("Work %d Result for %"PRIu64 " and %"PRIu64" :\n", work, nr, res);
+	printf("Work %d. Register vs%"PRIu64 " contains value %"PRIx64" :\n", work, nr, res);
 	printf("HTM failed and VMX registers got corrupted!\n");
 	exit(13);
 
