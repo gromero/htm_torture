@@ -121,6 +121,8 @@ void *worker(void *arg)
  uint64_t nr;
  uint64_t res;
 
+ unsigned short vrsave;
+
 #ifdef DEBUG
  printf("Thread executing Workload # %d\n", work);
 #endif

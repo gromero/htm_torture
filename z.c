@@ -90,7 +90,7 @@ int main(int argc, char **argv)
  vmx_correct_value[30] = (vector __int128) {0xBEEF};
  vmx_correct_value[31] = (vector __int128) {0xBEEF};
 
- // Values for each VMX register just after entering in a transactional block.
+ // Values for each VMX register just *before* entering in a transactional block.
  // Values below must match the expected correct values after a HTM failure, as
  // as specified in the code section above. TODO: add random generation value as
  // the expected correct values to torture kernel VMX restore code. 
@@ -130,12 +130,45 @@ int main(int argc, char **argv)
  _ ("tbegin.  \n\t");
  _ goto ("beq %l[_failure] \n\t" : : : : _failure);
 
- // Transactional code.
- // vmx0 = (vector __int128) {0xBABE};
+ // We set VMX register with a value different from what they
+ // were set *before* entering the HTM. If the transaction
+ // fails, then VMX registers after _failure is taken must
+ // be restored back to the values *before* entering the HTM.
 
- // Force all transactional code to abort.
-workload0();
- //_ ("tabort. 0 \n\t");
+ vmx0 = (vector __int128) {0xBABE};
+ vmx1 = (vector __int128) {0xBABE};
+ vmx2 = (vector __int128) {0xBABE};
+ vmx3 = (vector __int128) {0xBABE};
+ vmx4 = (vector __int128) {0xBABE};
+ vmx5 = (vector __int128) {0xBABE};
+ vmx6 = (vector __int128) {0xBABE};
+ vmx7 = (vector __int128) {0xBABE};
+ vmx8 = (vector __int128) {0xBABE};
+ vmx9 = (vector __int128) {0xBABE};
+ vmx10 = (vector __int128) {0xBABE};
+ vmx11 = (vector __int128) {0xBABE};
+ vmx12 = (vector __int128) {0xBABE};
+ vmx13 = (vector __int128) {0xBABE};
+ vmx14 = (vector __int128) {0xBABE};
+ vmx15 = (vector __int128) {0xBABE};
+ vmx16 = (vector __int128) {0xBABE};
+ vmx17 = (vector __int128) {0xBABE};
+ vmx18 = (vector __int128) {0xBABE};
+ vmx19 = (vector __int128) {0xBABE};
+ vmx20 = (vector __int128) {0xBABE};
+ vmx21 = (vector __int128) {0xBABE};
+ vmx22 = (vector __int128) {0xBABE};
+ vmx23 = (vector __int128) {0xBABE};
+ vmx24 = (vector __int128) {0xBABE};
+ vmx25 = (vector __int128) {0xBABE};
+ vmx26 = (vector __int128) {0xBABE};
+ vmx27 = (vector __int128) {0xBABE};
+ vmx28 = (vector __int128) {0xBABE};
+ vmx29 = (vector __int128) {0xBABE};
+ vmx30 = (vector __int128) {0xBABE};
+ vmx31 = (vector __int128) {0xBABE};
+
+  _ ("tabort. 0 \n\t");
 
  _ ("tend.    \n\t");
 
