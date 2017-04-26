@@ -90,9 +90,12 @@ int main(int argc, char **argv)
  vmx_correct_value[30] = (vector __int128) {0xBEEF};
  vmx_correct_value[31] = (vector __int128) {0xBEEF};
 
+ uint64_t vrsave_correct_value[1];
+ vrsave_correct_value[0] = 0xBABEBEEF; // It's a 32-bit register
+
  // Values for each VMX register just *before* entering in a transactional block.
  // Values below must match the expected correct values after a HTM failure, as
- // as specified in the code section above. TODO: add random generation value as
+ // specified in the code section above. TODO: add random generation value as
  // the expected correct values to torture kernel VMX restore code. 
  vmx0 = (vector __int128) {0xBEEF};
  vmx1 = (vector __int128) {0xBEEF};
@@ -127,14 +130,29 @@ int main(int argc, char **argv)
  vmx30 = (vector __int128) {0xBEEF};
  vmx31 = (vector __int128) {0xBEEF};
 
+ // Set the VRSAVE correct value
+ _ ("lwz 5, 0(%[vrsave_correct_value]) \n\t"
+    "mtvrsave 5                        \n\t"
+    :
+    : [vrsave_correct_value] "r"(vrsave_correct_value)
+    : "r5"
+   );
+
  _ ("tbegin.  \n\t");
  _ goto ("beq %l[_failure] \n\t" : : : : _failure);
+
+ // Mess the VRSAVE with any random value taken from Time Base register.
+ _ ("mftb     5    \n\t"
+    "mtvrsave 5    \n\t"
+    :
+    :
+    : "r5"
+   );
 
  // We set VMX register with a value different from what they
  // were set *before* entering the HTM. If the transaction
  // fails, then VMX registers after _failure is taken must
  // be restored back to the values *before* entering the HTM.
-
  vmx0 = (vector __int128) {0xBABE};
  vmx1 = (vector __int128) {0xBABE};
  vmx2 = (vector __int128) {0xBABE};
@@ -168,7 +186,7 @@ int main(int argc, char **argv)
  vmx30 = (vector __int128) {0xBABE};
  vmx31 = (vector __int128) {0xBABE};
 
-  _ ("tabort. 0 \n\t");
+ _ ("tabort. 0 \n\t");
 
  _ ("tend.    \n\t");
 
@@ -176,6 +194,13 @@ int main(int argc, char **argv)
 
 _failure:
    _ goto (
+
+     // Check if VRSAVE is sane.
+     "lwz      5, 0(%[vrsave_correct_value]) \n\t"
+     "mfvrsave 6                             \n\t"
+     "cmpd     5, 6                          \n\t"
+     "bne  %l[_value_mismatch]               \n\t"
+
      // Check if vmx0 is sane.
      "stvx 1, 0, %[vmx_scratch_area]   \n\t"
      "lvx  1, 0, %[vmx_correct_value]  \n\t"
@@ -375,8 +400,9 @@ _failure:
 	: // no output
         : [offset] "r"(offset),
 	  [vmx_correct_value] "r"(vmx_correct_value),
-          [vmx_scratch_area]  "r"(vmx_scratch_area)
-	: "memory"
+          [vmx_scratch_area]  "r"(vmx_scratch_area),
+          [vrsave_correct_value] "r"(vrsave_correct_value)
+	: "memory", "r5", "r6"
 	: _value_match, _value_mismatch
      );
 
