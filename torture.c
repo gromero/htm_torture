@@ -1,6 +1,6 @@
 #include "torture.h"
 
-void register_workload(void *func){
+void register_workload(void *func) {
 	int i = 0;
 	while (workloads[i] != NULL)
 		i++;
@@ -11,7 +11,7 @@ void register_workload(void *func){
 	#endif
 }
 
-void set_workloads(){
+void set_workloads() {
 	memset(workloads, 0, MAX_WORKLOADS);
 	nr_workloads = 0;
 
