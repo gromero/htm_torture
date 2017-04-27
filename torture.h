@@ -6,8 +6,13 @@
 #include <pthread.h>
 
 #define _ asm
-#define THREADS 64
-#define REPEAT 1024*1024
+// Number of threads to randomly distribute each workload.
+// It might be the case that for an equal or a small number
+// of THREADS is set in comparison to the number of workloads,
+// then it might be the case that some workload will not be
+// set to run.
+#define THREADS 6
+#define REPEAT 1
 #define MAX_WORKLOADS 6
 
 extern void workload0();
