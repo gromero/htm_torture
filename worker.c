@@ -79,20 +79,24 @@ void *worker(void *arg)
  vmx_correct_value[30] = (vector __int128) {0xBEEF};
  vmx_correct_value[31] = (vector __int128) {0xBEEF};
 
- // Values for each VMX register just after entering in a transactional block.
- // Values below must match the expected correct values after a HTM failure, as
+ // Expected correct value restored to VRSAVE after a HTM failure.
+ uint64_t vrsave_correct_value[1];     // A place to keep the correct value in memory
+ vrsave_correct_value[0] = 0xBABEBEEF; // The correct value itself, a 32-bit value
+
+ // Set values for each VMX register just before entering in a transactional block.
+ // Values below must match the expected correct values after a HTM failure,
  // as specified in the code section above. TODO: add random generated value as
- // the expected correct values to torture kernel VMX restore code. 
- vmx0 = (vector __int128) {0xBEEF};
- vmx1 = (vector __int128) {0xBEEF};
- vmx2 = (vector __int128) {0xBEEF};
- vmx3 = (vector __int128) {0xBEEF};
- vmx4 = (vector __int128) {0xBEEF};
- vmx5 = (vector __int128) {0xBEEF};
- vmx6 = (vector __int128) {0xBEEF};
- vmx7 = (vector __int128) {0xBEEF};
- vmx8 = (vector __int128) {0xBEEF};
- vmx9 = (vector __int128) {0xBEEF};
+ // the expected correct values to torture kernel VMX restore code.
+ vmx0  = (vector __int128) {0xBEEF};
+ vmx1  = (vector __int128) {0xBEEF};
+ vmx2  = (vector __int128) {0xBEEF};
+ vmx3  = (vector __int128) {0xBEEF};
+ vmx4  = (vector __int128) {0xBEEF};
+ vmx5  = (vector __int128) {0xBEEF};
+ vmx6  = (vector __int128) {0xBEEF};
+ vmx7  = (vector __int128) {0xBEEF};
+ vmx8  = (vector __int128) {0xBEEF};
+ vmx9  = (vector __int128) {0xBEEF};
  vmx10 = (vector __int128) {0xBEEF};
  vmx11 = (vector __int128) {0xBEEF};
  vmx12 = (vector __int128) {0xBEEF};
@@ -116,45 +120,114 @@ void *worker(void *arg)
  vmx30 = (vector __int128) {0xBEEF};
  vmx31 = (vector __int128) {0xBEEF};
 
+ // Set value for VRSAVE register just before entering in HTM block.
+ _ ("lwz 5, 0(%[vrsave_correct_value]) \n\t"
+    "mtvrsave 5                        \n\t"
+    :
+    : [vrsave_correct_value] "r"(vrsave_correct_value)
+    : "r5"
+   );
+
  int work = rand() % (nr_workloads - 1);
 
  uint64_t nr;
  uint64_t res;
 
- unsigned short vrsave;
 
 #ifdef DEBUG
  printf("Thread executing Workload # %d\n", work);
 #endif
 
-/* Start the transaction here */
+/***************
+ ** HTM BEGIN **
+****************/
  _ ("tbegin.  \n\t");
  _ goto ("beq %l[_failure] \n\t" : : : : _failure);
 
- // Execute a workload depending on the thread;
- (*workloads[work])();
+/**************
+ ** HTM BODY **
+ **************/
 
+ // Mess with the VRSAVE using a random value taken from Time Base register.
+ _ ("mftb     5    \n\t"
+    "mtvrsave 5    \n\t"
+    :
+    :
+    : "r5"
+   );
+
+ // We set VMX register with a value different from what they
+ // were set *before* entering the HTM. If the transaction
+ // fails, then VMX registers after _failure is taken must
+ // be restored back to the values *before* entering the HTM.
+ vmx0  = (vector __int128) {0xBABE};
+ vmx1  = (vector __int128) {0xBABE};
+ vmx2  = (vector __int128) {0xBABE};
+ vmx3  = (vector __int128) {0xBABE};
+ vmx4  = (vector __int128) {0xBABE};
+ vmx5  = (vector __int128) {0xBABE};
+ vmx6  = (vector __int128) {0xBABE};
+ vmx7  = (vector __int128) {0xBABE};
+ vmx8  = (vector __int128) {0xBABE};
+ vmx9  = (vector __int128) {0xBABE};
+ vmx10 = (vector __int128) {0xBABE};
+ vmx11 = (vector __int128) {0xBABE};
+ vmx12 = (vector __int128) {0xBABE};
+ vmx13 = (vector __int128) {0xBABE};
+ vmx14 = (vector __int128) {0xBABE};
+ vmx15 = (vector __int128) {0xBABE};
+ vmx16 = (vector __int128) {0xBABE};
+ vmx17 = (vector __int128) {0xBABE};
+ vmx18 = (vector __int128) {0xBABE};
+ vmx19 = (vector __int128) {0xBABE};
+ vmx20 = (vector __int128) {0xBABE};
+ vmx21 = (vector __int128) {0xBABE};
+ vmx22 = (vector __int128) {0xBABE};
+ vmx23 = (vector __int128) {0xBABE};
+ vmx24 = (vector __int128) {0xBABE};
+ vmx25 = (vector __int128) {0xBABE};
+ vmx26 = (vector __int128) {0xBABE};
+ vmx27 = (vector __int128) {0xBABE};
+ vmx28 = (vector __int128) {0xBABE};
+ vmx29 = (vector __int128) {0xBABE};
+ vmx30 = (vector __int128) {0xBABE};
+ vmx31 = (vector __int128) {0xBABE};
+
+ // Call workload.
+ // (*workloads[work])();
+ // _("tabort. 0 \n\t");
+/*************
+ ** HTM END **
+ *************/
  _ ("tend.    \n\t");
-
  _ goto ("b %l[_success] \n\t" : : : : _success);
+
 
 _failure:
    _ goto (
+
+     // Check if VRSAVE is sane.
+     "lwz      5, 0(%[vrsave_correct_value]) \n\t"
+     "mfvrsave 6                             \n\t"
+     "cmpd     5, 6                          \n\t"
+     "li       6, 32                         \n\t"
+     "bne  %l[_value_mismatch]               \n\t"
+
      // Check if vmx0 is sane.
      "stvx 1, 0, %[vmx_scratch_area]   \n\t"
      "lvx  1, 0, %[vmx_correct_value]  \n\t"
      "vcmpequb. 0, 0, 1                \n\t"
      "lvx  1, 0,  %[vmx_scratch_area]  \n\t"
-     "mfvrd 5, 0 \n\t"
-     "li     6, 0 \n\t"
+     "mfvrd 5, 0                       \n\t"
+     "li     6, 0                      \n\t"
      "bc   4, 24, %l[_value_mismatch]  \n\t"
 
      // Check if vmx1 is sane.
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value]  \n\t"
      "vcmpequb. 0, 0, 1                \n\t"
-     "mfvrd 5, 1 \n\t"
-     "li     6, 1 \n\t"
+     "mfvrd 5, 1                       \n\t"
+     "li     6, 1                      \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t"
 
      // Check if vmx2 is sane.
@@ -403,8 +476,9 @@ _failure:
         : // no output 
         : [offset] "r"(offset), 
           [vmx_correct_value] "r"(vmx_correct_value), 
-          [vmx_scratch_area]  "r"(vmx_scratch_area)
-        : "memory"
+          [vmx_scratch_area]  "r"(vmx_scratch_area),
+          [vrsave_correct_value] "r"(vrsave_correct_value)
+        : "memory", "r5", "r6"
         : _value_match, _value_mismatch
      );
 
@@ -412,9 +486,15 @@ _value_mismatch:
 	_ ("mr %[nr], 6 \n\t": [nr] "=r"(nr) : :);
 	_ ("mr %[res], 5 \n\t": [res] "=r"(res) : :);
 
-	printf("Work %d. Register vs%"PRIu64 " contains value %"PRIx64" :\n", work, nr, res);
-	printf("HTM failed and VMX registers got corrupted!\n");
-	exit(13);
+       if (nr == 32) { // VRSAVE got corrupted
+         printf("Wordload %d: register VRSAVE got corrupted.\n", work);
+         printf("HTM failed and VRSAVE register got corrupted!\n");
+         exit(13);
+       } else {       // VSX/VMX got corrupted
+         printf("Workload %d: register vs%"PRIu64 " contains value 0x%"PRIx64"\n", work, nr+32, res);
+         printf("HTM failed and VMX registers got corrupted!\n");
+         exit(14);
+       }
 
 _value_match:
 	#ifdef DEBUG
