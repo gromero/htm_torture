@@ -32,4 +32,4 @@ extern void start_threads(uint64_t threads);
 extern void *worker(void *arg);
 
 
-//#define DEBUG
+#define DEBUG
