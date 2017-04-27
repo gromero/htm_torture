@@ -194,8 +194,8 @@ void *worker(void *arg)
  vmx31 = (vector __int128) {0xBABE};
 
  // Call workload.
- // (*workloads[work])();
- // _("tabort. 0 \n\t");
+ (*workloads[work])();
+
 /*************
  ** HTM END **
  *************/
