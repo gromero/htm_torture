@@ -15,12 +15,12 @@ void set_workloads(){
 	memset(workloads, 0, MAX_WORKLOADS);
 	nr_workloads = 0;
 
-	register_workload(workload0);
-	register_workload(workload1);
-	register_workload(workload2);
-	register_workload(workload3);
-	register_workload(workload4);
-	register_workload(workload5);
+	register_workload(workload0); // syscall
+	register_workload(workload1); // recursion
+	register_workload(workload2); // nop
+	register_workload(workload3); // tabort.
+	register_workload(workload4); // quicksort
+	register_workload(workload5); // illegal instruction
 }
 
 	
