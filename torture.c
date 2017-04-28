@@ -70,17 +70,25 @@ int main(int argc, char **argv) {
 
 	set_workloads();
 
-        init_workers();
+
+        int nr_threads = THREADS / MAX_WORKLOADS;
+        printf("Thread per worload type: %d\n", nr_threads);
+
+        while (1) {
 
         /**** WORKLOADS ****/
 
-        start_workers(0, 1);
-        start_workers(1, 1);
-        start_workers(2, 1);
-        start_workers(3, 1);
-        start_workers(4, 1);
-        start_workers(5, 1);
-        start_workers(6, 1);
+        init_workers();
+
+        nr_threads = 450;
+
+        start_workers(0, nr_threads);
+        start_workers(1, nr_threads);
+        start_workers(2, nr_threads);
+        start_workers(3, nr_threads);
+        start_workers(4, nr_threads);
+        start_workers(5, nr_threads);
+        start_workers(6, nr_threads);
 
         // Preparation for workload7. TODO: improve argument passing to workloads like that.
         array = (unsigned long *) calloc(ARRAY_SIZE, sizeof(unsigned long));
@@ -89,13 +97,17 @@ int main(int argc, char **argv) {
         for (uint64_t i = 0; i < ARRAY_SIZE; i++) array[i] = rand();
 
         // Order array.
-        start_workers(7, 10); //utpsm_qsort
+        start_workers(7, nr_threads); //utpsm_qsort
 
-        start_workers(8, 1); // Illegal instruction
-        start_workers(9, 1); // trap
+        start_workers(8, nr_threads); // Illegal instruction
+        start_workers(9, nr_threads); // trap
 
+
+        join_workers();
 
         /*******************/
+
+        } // while (1)
 /*
         // Print ordered array
         for (int i = 0; i < ARRAY_SIZE; i++) printf("%ld\n", array[i]);

@@ -12,7 +12,7 @@
 // of THREADS is set in comparison to the number of workloads,
 // then it might be the case that some workload will not be
 // set to run.
-#define THREADS 64
+#define THREADS 1024*1024*25
 #define REPEAT 1
 #define MAX_WORKLOADS 10
 
@@ -44,8 +44,9 @@ uint64_t  num_used_threads;
 
 void init_workers(void);
 void start_workers(uint64_t, uint64_t);
+void join_workers(void);
 
 extern void start_threads(uint64_t threads);
 extern void *worker(void *arg);
 
-#define DEBUG
+// #define DEBUG
