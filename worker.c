@@ -136,7 +136,7 @@ void *worker(void *arg)
 
 
 #ifdef DEBUG
- printf("Thread executing workload #%d: ", (int) workload);
+ printf("Thread executing workload #%d: ", workload);
 #endif
 
 /***************
