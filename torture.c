@@ -20,7 +20,7 @@ void set_workloads() {
 	register_workload(workload2, "nop");                 // nop
 	register_workload(workload3, "tabort.");             // tabort.
 	register_workload(workload4, "quicksort");           // quicksort
-	register_workload(workload5, "illegal instruction"); // illegal instruction
+	register_workload(workload5, "loop");                // loop
 
         printf("\n");
 }
