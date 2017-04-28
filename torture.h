@@ -13,7 +13,13 @@
 // set to run.
 #define THREADS 7
 #define REPEAT 1
-#define MAX_WORKLOADS 7
+#define MAX_WORKLOADS 8
+
+// This is the array size to be ordered by workload7: uptsm_qsort.
+#define ARRAY_SIZE 64
+
+// Thi is the array pointer to be ordered by worload7: uptsm_qsort.
+extern unsigned long *array;
 
 extern void workload0();
 extern void workload1();
@@ -22,6 +28,7 @@ extern void workload3();
 extern void workload4();
 extern void workload5();
 extern void workload6();
+extern void utpsm_qsort();
 
 // Array of workloads functions
 void (*workloads[MAX_WORKLOADS])();
@@ -37,6 +44,5 @@ void start_workers(uint64_t, uint64_t);
 
 extern void start_threads(uint64_t threads);
 extern void *worker(void *arg);
-
 
 #define DEBUG

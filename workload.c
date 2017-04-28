@@ -79,3 +79,95 @@ void workload5() {
 void workload6() {
 	while(1);
 }
+
+/*** workdload7 ***/
+
+unsigned long *array;
+
+void Swap(unsigned long *a, unsigned long *b)
+{
+        int temp;
+        temp = *a;
+        *a = *b;
+        *b = temp;
+}
+
+void PartitionArray(unsigned long *a, int left, int right, int *PivotLoc)
+{
+        *PivotLoc = left;
+
+        while(1)
+        {
+                while(*(a+(*PivotLoc)) <= *(a+right) && *PivotLoc != right)
+                {
+                        right--;
+                }
+                if(*PivotLoc == right)
+                {
+                        break;
+                }
+                else if(*(a+(*PivotLoc)) > *(a+right))
+                {
+                        Swap((a+(*PivotLoc)), (a+right));
+                        *PivotLoc = right;
+                        left++;
+                }
+
+                while(*(a+(*PivotLoc)) >= *(a+left) && *PivotLoc != left)
+                {
+                        left++;
+                }
+                if(*PivotLoc == left)
+                {
+                        break;
+                }
+                else if(*(a+(*PivotLoc)) < *(a+left))
+                {
+                        Swap((a+(*PivotLoc)), (a+left));
+                        *PivotLoc = left;
+                        right--;
+                }
+        } // end while(1)
+}
+
+void QuickSort(unsigned long *a, int left, int right)
+{
+        if(left < right)
+        {
+                int PivotLoc;
+                PartitionArray(a, left, right, &PivotLoc);
+                QuickSort(a, left, PivotLoc-1);
+                QuickSort(a, PivotLoc+1, right);
+        }
+}
+
+void utpsm_qsort()
+{
+        QuickSort(array, 0, ARRAY_SIZE-1);
+}
+
+/*
+int main()
+{
+ array = (unsigned long *) calloc(ARRAY_SIZE, sizeof(unsigned long));
+
+ // Fill array with pseudo-random values.
+ for (int i = 0; i < ARRAY_SIZE; i++)
+   array[i] = rand();
+
+ // Print array.
+ for (int i = 0; i < ARRAY_SIZE; i++)
+   printf("%ld\n", array[i]);
+
+ printf("===========================================================\n");
+
+ // Order array.
+ QuickSort(array,0, ARRAY_SIZE-1);
+
+ // Print ordered array.
+ for (int i = 0; i < ARRAY_SIZE; i++)
+   printf("%ld\n", array[i]);
+
+ exit(0);
+}
+*/
