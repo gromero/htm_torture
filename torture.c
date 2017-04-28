@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
 
 	printf("Hardware Transactional Memory Torture\n\n");
 	printf("! = Transaction Failed but the VSX + VRSAVE registers were preserved\n");
-	printf(". = Transaction Succeeded but the VSX + VRSAVE registers were preserved\n\n");
+	printf(". = Transaction Succeeded (in that case VSX + VRSAVE registers are not checked\n\n");
 
 //	printf("Starting %"PRIu64 " threads\n", threads);
 //	printf("---------------------------\n");
