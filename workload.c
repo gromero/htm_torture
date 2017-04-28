@@ -145,3 +145,8 @@ void utpsm_qsort()
 {
         QuickSort(array, 0, ARRAY_SIZE-1);
 }
+
+// illegal instruction.
+void workload8() {
+  _ (".long 0x0");
+}

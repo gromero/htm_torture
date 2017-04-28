@@ -23,8 +23,22 @@ void set_workloads() {
 	register_workload(workload5, "loop");                // loop
 	register_workload(workload6, "infite loop");         // infite loop
 	register_workload(utpsm_qsort, "utpsm_qsort");       // utpsm_qsort
+	register_workload(workload8, "illegal instruction"); // illegal instruction
 
         printf("\n");
+}
+
+void signal_handler(int signo, siginfo_t *si, void *data)
+{
+ // Set a local pointer to uc.
+ ucontext_t *uc = (ucontext_t *)data;
+
+ // printf("* Received a SIGTRAP\n");
+ // printf("* si->si_addr = %p\n", si->si_addr);
+ // printf("* uc->uc_mcontext.regs->nip: %p\n", (void *) uc->uc_mcontext.regs->nip);
+
+ // uc->uc_mcontext.regs->nip += 4; // Skip illegal instruction.
+ // uc->uc_mcontext.gp_regs[32] += 4; // Same as above ;-)
 }
 
 	
@@ -44,8 +58,17 @@ int main(int argc, char **argv) {
 //	printf("Starting %"PRIu64 " threads\n", threads);
 //	printf("---------------------------\n");
 
-	set_workloads();
+	// Install signal handler for all threads.
+        struct sigaction sa;
 
+	sa.sa_flags = SA_SIGINFO;
+	sa.sa_sigaction = signal_handler;
+	sigaction(SIGTRAP, &sa, NULL);
+	sigaction(SIGILL,  &sa, NULL);
+
+
+	set_workloads();
+/*
         init_workers();
         start_workers(0, 1);
         start_workers(1, 1);
@@ -62,7 +85,10 @@ int main(int argc, char **argv) {
         for (uint64_t i = 0; i < ARRAY_SIZE; i++) array[i] = rand();
 
         // Order array
-        start_workers(7, 1);
+        start_workers(7, 10);
+*/
+
+        start_workers(8, 1); // Illegal instruction
 
 /*
         // Print ordered array
