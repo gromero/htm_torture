@@ -45,8 +45,13 @@ int main(int argc, char **argv) {
 	set_workloads();
 
         init_workers();
+
         start_workers(0, 1);
         start_workers(1, 1);
+        start_workers(2, 1);
+        start_workers(3, 1);
+        start_workers(4, 1);
+        start_workers(5, 1);
 
 //	for (int i = 0; i < REPEAT; i++)
 //		start_threads(threads);
