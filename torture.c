@@ -24,6 +24,7 @@ void set_workloads() {
 	register_workload(workload6, "infite loop");         // infite loop
 	register_workload(utpsm_qsort, "utpsm_qsort");       // utpsm_qsort
 	register_workload(workload8, "illegal instruction"); // illegal instruction
+	register_workload(workload9, "trap");                // trap
 
         printf("\n");
 }
@@ -31,7 +32,7 @@ void set_workloads() {
 void signal_handler(int signo, siginfo_t *si, void *data)
 {
  // Set a local pointer to uc.
- ucontext_t *uc = (ucontext_t *)data;
+ // ucontext_t *uc = (ucontext_t *)data;
 
  // printf("* Received a SIGTRAP\n");
  // printf("* si->si_addr = %p\n", si->si_addr);
@@ -89,6 +90,7 @@ int main(int argc, char **argv) {
 */
 
         start_workers(8, 1); // Illegal instruction
+        start_workers(9, 1); // trap
 
 /*
         // Print ordered array

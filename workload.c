@@ -150,3 +150,8 @@ void utpsm_qsort()
 void workload8() {
   _ (".long 0x0");
 }
+
+// trap
+void workload9() {
+  _ ("trap");
+}

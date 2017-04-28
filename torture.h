@@ -14,7 +14,7 @@
 // set to run.
 #define THREADS 64
 #define REPEAT 1
-#define MAX_WORKLOADS 9
+#define MAX_WORKLOADS 10
 
 // This is the array size to be ordered by workload7: uptsm_qsort.
 #define ARRAY_SIZE 64
@@ -31,6 +31,7 @@ extern void workload5();
 extern void workload6();
 extern void utpsm_qsort();
 extern void workload8();
+extern void workload9();
 
 // Array of workloads functions
 void (*workloads[MAX_WORKLOADS])();
