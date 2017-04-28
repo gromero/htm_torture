@@ -1,13 +1,13 @@
 #include "torture.h"
 
-void register_workload(void *func) {
+void register_workload(void *func, char *description) {
 	int i = 0;
 	while (workloads[i] != NULL)
 		i++;
 	workloads[i] = func;
 	nr_workloads++;
 	#ifdef DEBUG
-	printf("Registering workload %d\n", nr_workloads);
+	printf("Registering workload %d (%s)\n", nr_workloads, description ? description : "no description available");
 	#endif
 }
 
@@ -15,12 +15,14 @@ void set_workloads() {
 	memset(workloads, 0, MAX_WORKLOADS);
 	nr_workloads = 0;
 
-	register_workload(workload0); // syscall
-	register_workload(workload1); // recursion
-	register_workload(workload2); // nop
-	register_workload(workload3); // tabort.
-	register_workload(workload4); // quicksort
-	register_workload(workload5); // illegal instruction
+	register_workload(workload0, "syscall");             // syscall
+	register_workload(workload1, "recursion");           // recursion, fib
+	register_workload(workload2, "nop");                 // nop
+	register_workload(workload3, "tabort.");             // tabort.
+	register_workload(workload4, "quicksort");           // quicksort
+	register_workload(workload5, "illegal instruction"); // illegal instruction
+
+        printf("\n");
 }
 
 	
