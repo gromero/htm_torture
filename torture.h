@@ -11,7 +11,7 @@
 // of THREADS is set in comparison to the number of workloads,
 // then it might be the case that some workload will not be
 // set to run.
-#define THREADS 7
+#define THREADS 8
 #define REPEAT 1
 #define MAX_WORKLOADS 8
 

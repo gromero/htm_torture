@@ -47,7 +47,6 @@ int main(int argc, char **argv) {
 	set_workloads();
 
         init_workers();
-/*
         start_workers(0, 1);
         start_workers(1, 1);
         start_workers(2, 1);
@@ -55,7 +54,6 @@ int main(int argc, char **argv) {
         start_workers(4, 1);
         start_workers(5, 1);
         start_workers(6, 1);
-*/
 
         // Preparation for workload7. TODO: improve argument passing to workloads like that.
         array = (unsigned long *) calloc(ARRAY_SIZE, sizeof(unsigned long));
@@ -66,8 +64,10 @@ int main(int argc, char **argv) {
         // Order array
         start_workers(7, 1);
 
+/*
         // Print ordered array
         for (int i = 0; i < ARRAY_SIZE; i++) printf("%ld\n", array[i]);
+*/
 
 //	for (int i = 0; i < REPEAT; i++)
 //		start_threads(threads);
