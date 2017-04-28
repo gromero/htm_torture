@@ -1,5 +1,5 @@
 LDFLAGS = -lpthread
-CC = gcc
+CC = gcc -Wno-pointer-to-int-cast
 DEBUG = -O0 -g
 
 %.o: %.c $(DEPS)

@@ -28,6 +28,12 @@ void (*workloads[MAX_WORKLOADS])();
 // not TLS (.bss)
 int nr_workloads;
 
+pthread_t thread_pool[THREADS];
+uint64_t  num_used_threads;
+
+void init_workers(void);
+void start_workers(uint64_t, uint64_t);
+
 extern void start_threads(uint64_t threads);
 extern void *worker(void *arg);
 

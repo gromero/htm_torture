@@ -129,13 +129,14 @@ void *worker(void *arg)
    );
 
  int work = rand() % (nr_workloads - 1);
+ uint64_t workload = (int) arg; // I know you will frown upon void * to int cast ;-)
 
  uint64_t nr;
  uint64_t res;
 
 
 #ifdef DEBUG
- printf("Thread executing Workload # %d\n", work);
+ printf("Thread executing workload #%d: ", (int) workload);
 #endif
 
 /***************
@@ -194,7 +195,7 @@ void *worker(void *arg)
  vmx31 = (vector __int128) {0xBABE};
 
  // Call workload.
- (*workloads[work])();
+ (*workloads[workload])();
 
 /*************
  ** HTM END **
@@ -483,29 +484,34 @@ _failure:
      );
 
 _value_mismatch:
+        // TODO: move 'nr' and 'res' to input list in inline asm above and remove from here.
 	_ ("mr %[nr], 6 \n\t": [nr] "=r"(nr) : :);
 	_ ("mr %[res], 5 \n\t": [res] "=r"(res) : :);
 
        if (nr == 32) { // VRSAVE got corrupted
-         printf("Wordload %d: register VRSAVE got corrupted.\n", work);
+         printf("Wordload %ld: register VRSAVE got corrupted.\n", workload);
          printf("HTM failed and VRSAVE register got corrupted!\n");
          exit(13);
        } else {       // VSX/VMX got corrupted
-         printf("Workload %d: register vs%"PRIu64 " contains value 0x%"PRIx64"\n", work, nr+32, res);
+         printf("Workload %ld: register vs%"PRIu64 " contains value 0x%"PRIx64"\n", workload, nr+32, res);
          printf("HTM failed and VMX registers got corrupted!\n");
          exit(14);
        }
 
 _value_match:
-	#ifdef DEBUG
-	printf("Work %d Result:\n", work);
-	printf("HTM failed but VMX registers are OK\n");
-	#endif
 	printf("!");
+	#ifdef DEBUG
+	printf(" HTM failed but VMX and VRSAVE registers are OK\n");
+	#endif
+	goto _finish;
 
 _success:
 	printf(".");
 	#ifdef DEBUG
-	printf("HTM succeeded\n");
+	printf(" HTM succeeded\n");
 	#endif
+
+_finish:
+	_ ("nop"); // Can't label in the void...
+
 }

@@ -33,16 +33,21 @@ int main(int argc, char **argv) {
 	else
 		threads = THREADS;
 
-	printf("Hardware Transaction Memory Torture\n");
+	printf("Hardware Transactional Memory Torture\n\n");
 	printf("! = Transaction Failed but the VSX + VRSAVE registers were preserved\n");
 	printf(". = Transaction Succeeded but the VSX + VRSAVE registers were preserved\n\n");
-	printf("Starting %"PRIu64 " threads\n", threads);
-	printf("---------------------------\n");
+
+//	printf("Starting %"PRIu64 " threads\n", threads);
+//	printf("---------------------------\n");
 
 	set_workloads();
 
-	for (int i = 0; i < REPEAT; i++)
-		start_threads(threads);
+        init_workers();
+        start_workers(0, 1);
+        start_workers(1, 1);
+
+//	for (int i = 0; i < REPEAT; i++)
+//		start_threads(threads);
 
 	return 0;
 }
