@@ -11,9 +11,9 @@
 // of THREADS is set in comparison to the number of workloads,
 // then it might be the case that some workload will not be
 // set to run.
-#define THREADS 6
+#define THREADS 7
 #define REPEAT 1
-#define MAX_WORKLOADS 6
+#define MAX_WORKLOADS 7
 
 extern void workload0();
 extern void workload1();
@@ -21,6 +21,7 @@ extern void workload2();
 extern void workload3();
 extern void workload4();
 extern void workload5();
+extern void workload6();
 
 // Array of workloads functions
 void (*workloads[MAX_WORKLOADS])();

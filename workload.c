@@ -74,3 +74,8 @@ void workload5() {
 	for (i=0; i < 10; )
 		i++;
 }
+
+// Infinite loop.
+void workload6() {
+	while(1);
+}

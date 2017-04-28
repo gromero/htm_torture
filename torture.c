@@ -21,6 +21,7 @@ void set_workloads() {
 	register_workload(workload3, "tabort.");             // tabort.
 	register_workload(workload4, "quicksort");           // quicksort
 	register_workload(workload5, "loop");                // loop
+	register_workload(workload6, "infite loop");         // infite loop
 
         printf("\n");
 }
@@ -52,6 +53,7 @@ int main(int argc, char **argv) {
         start_workers(3, 1);
         start_workers(4, 1);
         start_workers(5, 1);
+        start_workers(6, 1);
 
 //	for (int i = 0; i < REPEAT; i++)
 //		start_threads(threads);
