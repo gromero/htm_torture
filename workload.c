@@ -21,7 +21,6 @@ void workload1() {
 	int n = 40;
 
 	sum = fib(n);
-	printf("Workload 1\n");
 }
 
 /* ----------- */
