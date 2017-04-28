@@ -69,8 +69,11 @@ int main(int argc, char **argv) {
 
 
 	set_workloads();
-/*
+
         init_workers();
+
+        /**** WORKLOADS ****/
+
         start_workers(0, 1);
         start_workers(1, 1);
         start_workers(2, 1);
@@ -85,13 +88,14 @@ int main(int argc, char **argv) {
         // Fill array with pseudo-random values.
         for (uint64_t i = 0; i < ARRAY_SIZE; i++) array[i] = rand();
 
-        // Order array
-        start_workers(7, 10);
-*/
+        // Order array.
+        start_workers(7, 10); //utpsm_qsort
 
         start_workers(8, 1); // Illegal instruction
         start_workers(9, 1); // trap
 
+
+        /*******************/
 /*
         // Print ordered array
         for (int i = 0; i < ARRAY_SIZE; i++) printf("%ld\n", array[i]);
