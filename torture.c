@@ -5,10 +5,10 @@ void register_workload(void *func, char *description) {
 	while (workloads[i] != NULL)
 		i++;
 	workloads[i] = func;
-	nr_workloads++;
 	#ifdef DEBUG
 	printf("Registering workload %d (%s)\n", nr_workloads, description ? description : "no description available");
 	#endif
+	nr_workloads++;
 }
 
 void set_workloads() {
