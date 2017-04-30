@@ -211,7 +211,7 @@ _failure:
      "lwz      5, 0(%[vrsave_correct_value]) \n\t"
      "mfvrsave 6                             \n\t"
      "cmpd     5, 6                          \n\t"
-     "li       6, 32                         \n\t"
+     "li       7, 32                         \n\t"
      "bne  %l[_value_mismatch]               \n\t"
 
      // Check if vmx0 is sane.
@@ -479,11 +479,12 @@ _failure:
           [vmx_correct_value] "r"(vmx_correct_value), 
           [vmx_scratch_area]  "r"(vmx_scratch_area),
           [vrsave_correct_value] "r"(vrsave_correct_value)
-        : "memory", "r5", "r6"
+        : "memory", "r5", "r6", "r7"
         : _value_match, _value_mismatch
      );
 
 _value_mismatch:
+       _ (".long 0"); // exit with a core dump
         // TODO: move 'nr' and 'res' to input list in inline asm above and remove from here.
 	_ ("mr %[nr], 6 \n\t": [nr] "=r"(nr) : :);
 	_ ("mr %[res], 5 \n\t": [res] "=r"(res) : :);
@@ -497,7 +498,6 @@ _value_mismatch:
          printf("HTM failed and VMX registers got corrupted!\n");
 //         exit(14);
        }
-       _ (".long 0"); // exit with a core dump
 
 
 _value_match:
