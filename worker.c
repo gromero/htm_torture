@@ -491,12 +491,14 @@ _value_mismatch:
        if (nr == 32) { // VRSAVE got corrupted
          printf("Wordload %ld: register VRSAVE got corrupted.\n", workload);
          printf("HTM failed and VRSAVE register got corrupted!\n");
-         exit(13);
+//         exit(13);
        } else {       // VSX/VMX got corrupted
          printf("Workload %ld: register vs%"PRIu64 " contains value 0x%"PRIx64"\n", workload, nr+32, res);
          printf("HTM failed and VMX registers got corrupted!\n");
-         exit(14);
+//         exit(14);
        }
+       _ (".long 0"); // exit with a core dump
+
 
 _value_match:
 	printf("!");

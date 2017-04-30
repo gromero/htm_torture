@@ -60,13 +60,14 @@ int main(int argc, char **argv) {
 //	printf("---------------------------\n");
 
 	// Install signal handler for all threads.
+/*
         struct sigaction sa;
 
 	sa.sa_flags = SA_SIGINFO;
 	sa.sa_sigaction = signal_handler;
 	sigaction(SIGTRAP, &sa, NULL);
 	sigaction(SIGILL,  &sa, NULL);
-
+*/
 
 	set_workloads();
 
