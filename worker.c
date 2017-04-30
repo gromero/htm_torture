@@ -214,7 +214,9 @@ _failure:
      "li       7, 32                         \n\t"
      "bne  %l[_value_mismatch]               \n\t"
 */
-     // Check if vmx0 is sane.
+     // Check if vmx0 is sane
+     "li 6, 0 \n\t"
+     ".long 0 \n\t"
      "stvx 1, 0, %[vmx_scratch_area]   \n\t"
      "lvx  1, 0, %[vmx_correct_value]  \n\t"
      "vcmpequb. 0, 0, 1                \n\t"
