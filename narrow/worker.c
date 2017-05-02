@@ -7,6 +7,7 @@
 #include <sys/mman.h>
 
 #define _ asm
+
 #define DEFAULT_THREADS 16384
 
 void *worker() {
@@ -26,62 +27,63 @@ void *worker() {
 	   "ori      3,  3, 47806                  \n\t" // 0xBABE
 	   "std      3,  0(%[vmx0_new_value])      \n\t"
 
-	/***************
+
+	/**************
 	** HTM BEGIN **
-	****************/
+	***************/
 
 	   "tbegin.                               \n\t"
-	   "beq     %l[_failure]                  \n\t"
+	   "beq     _failure                      \n\t"
+
+
+	/*************
+	** HTM BODY **
+	**************/
            
            "lvx  0, 0, %[vmx0_new_value]          \n\t"
+
+
+	/************
+	** HTM END **
+	*************/
+
            "tend.                                 \n\t"
 	   "b     %l[_success]                    \n\t"
 
+	    // Check vmx0 sanity
+	    "_failure: lvx       1,  0, %[vmx0_correct_value]     \n\t"
+	    "          vcmpequb. 2,  0, 1                         \n\t"
+	    "          bc        4, 24, %l[_value_mismatch]       \n\t"
+	    "          b  %l[_value_match]                        \n\t"
 	   :
 	   : [vmx0_correct_value] "r"(vmx0_correct_value),
              [vmx0_new_value]     "r"(vmx0_new_value)
 	   : "r3"	     
-	   : _failure, _success
+	   : _success, _value_match, _value_mismatch
 	  );
 
-
-
-_failure:
-	  _ goto (
-
-	    // Check if vmx0 is sane.
-	    "lvx  1, 0, %[vmx0_correct_value]  \n\t"
-	    "vcmpequb. 2, 0, 1                \n\t"
-	    "bc   4, 24, %l[_value_mismatch]  \n\t"
-
-	    // Reach here, then all registers are sane.
-	    "b  %l[_value_match]              \n\t"
-
-	       : // no output
-	       : [vmx0_correct_value] "r" (vmx0_correct_value) 
-	       : 
-	       : _value_match, _value_mismatch
-	    );
-
+// HTM failed and vmx is corrupted
 _value_mismatch:
 	_texasr = __builtin_get_texasr();
+
 	printf("\n\n==============\n\n");
-	printf("\nFailure with error: %lx\n\n",  _TEXASR_FAILURE_CODE(_texasr));
-	printf(": Summary error: %lx\n",  _TEXASR_FAILURE_SUMMARY(_texasr));
-	printf(": TFIAR error: %lx\n\n", _TEXASR_TFIAR_EXACT(_texasr));
+	printf("Failure with error: %lx\n",   _TEXASR_FAILURE_CODE(_texasr));
+	printf("Summary error     : %lx\n",   _TEXASR_FAILURE_SUMMARY(_texasr));
+	printf("TFIAR exact       : %lx\n\n", _TEXASR_TFIAR_EXACT(_texasr));
 
-	_ (".long 0"); // exit with a core dump
+	_ (".long 0"); // Exit with a core dump
 
+// HTM failed but vmx is not corrputed
 _value_match:
 	printf("!");
 	goto _finish;
 
+// HTM succeeded
 _success:
 	printf(".");
 
 _finish:
-	_ ("nop"); // Can't label in the void...
-
+	_ ("nop"); // a 'nop' just because we can't label in the void...
 }
 
 int main(int argc, char **argv){
@@ -89,9 +91,8 @@ int main(int argc, char **argv){
 
 	if (argc > 1)
 		threads = atoi(argv[1]);
-        //worker();
 
-	printf("Torture tool starting with %d threads\n", threads);
+	printf("Torture starting with %d threads.\n", threads);
 
 	pthread_t thread[threads];
 	for (uint64_t i = 0; i < threads; i++)
@@ -100,5 +101,5 @@ int main(int argc, char **argv){
 	for (uint64_t i = 0; i < threads; i++)
 		pthread_join(thread[i], NULL);
 
-		return 0;
+	return 0;
 }
