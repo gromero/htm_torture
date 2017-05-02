@@ -4,11 +4,26 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <pthread.h>
+#include <sys/mman.h>
 
 #define _ asm
 #define DEFAULT_THREADS 16384
 
 void *worker() {
+
+        void *vmx0_correct_value = mmap(NULL, 16 /* 128 bits */, PROT_READ | PROT_WRITE,  MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+
+	_ (
+           "xor     3,  3, 3                      \n\t"
+	   "ori     3,  3, 48879                  \n\t" // 0xBEEF
+           "std     3,  8(%[vmx0_correct_value])  \n\t"
+	   "lxvd2x 32, 0, %[vmx0_correct_value]   \n\t" // vmx0 = 0x0000000000000000000000000000BEEF
+	   :
+	   : [vmx0_correct_value] "r"(vmx0_correct_value)
+	   :
+	  );
+
+/*
 	// VMX registers.
 	register vector __int128 vmx0  asm ("vs32");
 
@@ -30,7 +45,7 @@ void *worker() {
 	// as specified in the code section above. TODO: add random generated value as
 	// the expected correct values to torture kernel VMX restore code.
 	vmx0  = (vector __int128) {0xBEEF};
-
+*/
 	/***************
 	** HTM BEGIN **
 	****************/
@@ -107,7 +122,8 @@ int main(int argc, char **argv){
 
 	if (argc > 1)
 		threads = atoi(argv[1]);
-
+        worker();
+	/*
 	printf("Torture tool starting with %d threads\n", threads);
 
 	pthread_t thread[threads];
@@ -116,6 +132,6 @@ int main(int argc, char **argv){
 
 	for (uint64_t i = 0; i < threads; i++)
 		pthread_join(thread[i], NULL);
-
+*/
 	return 0;
 }
