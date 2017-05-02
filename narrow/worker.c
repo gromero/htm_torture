@@ -12,96 +12,63 @@
 void *worker() {
 
         void *vmx0_correct_value = mmap(NULL, 16 /* 128 bits */, PROT_READ | PROT_WRITE,  MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+        void *vmx0_new_value     = mmap(NULL, 16 /* 128 bits */, PROT_READ | PROT_WRITE,  MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+      
+        uint64_t _texasr;
 
-	_ (
+	_  goto (
            "xor     3,  3, 3                      \n\t"
 	   "ori     3,  3, 48879                  \n\t" // 0xBEEF
            "std     3,  8(%[vmx0_correct_value])  \n\t"
 	   "lxvd2x 32, 0, %[vmx0_correct_value]   \n\t" // vmx0 = 0x0000000000000000000000000000BEEF
-	   :
-	   : [vmx0_correct_value] "r"(vmx0_correct_value)
-	   :
-	  );
 
-/*
-	// VMX registers.
-	register vector __int128 vmx0  asm ("vs32");
+           "xor      3,  3, 3                      \n\t"
+	   "ori      3,  3, 47806                  \n\t" // 0xBABE
+	   "std      3,  8(%[vmx0_new_value])  \n\t"
 
-	vector __int128 vmx_correct_value[32];
-	vector __int128 vmx_scratch_area[2];
-
-	uint64_t offset = 0;
-	uint64_t z;
-
-	// Expected correct values restored after a HTM failure.
-	vmx_correct_value[0]  = (vector __int128) {0xBEEF};
-
-	// Expected correct value restored to VRSAVE after a HTM failure.
-	uint64_t vrsave_correct_value[1];     // A place to keep the correct value in memory
-	vrsave_correct_value[0] = 0xBABEBEEF; // The correct value itself, a 32-bit value
-
-	// Set values for each VMX register just before entering in a transactional block.
-	// Values below must match the expected correct values after a HTM failure,
-	// as specified in the code section above. TODO: add random generated value as
-	// the expected correct values to torture kernel VMX restore code.
-	vmx0  = (vector __int128) {0xBEEF};
-*/
 	/***************
 	** HTM BEGIN **
 	****************/
-	_ ("tbegin.  \n\t");
-	_ goto ("beq %l[_failure] \n\t" : : : : _failure);
 
-	/**************
-	** HTM BODY **
-	**************/
+	   "tbegin.                               \n\t"
+	   "beq     %l[_failure]                  \n\t"
+           
+           "lxvd2x  32, 0, %[vmx0_new_value]      \n\t"
+           "tend.                                 \n\t"
+	   "b     %l[_success]                    \n\t"
 
-	// We set VMX register with a value different from what they
-	// were set *before* entering the HTM. If the transaction
-	// fails, then VMX registers after _failure is taken must
-	// be restored back to the values *before* entering the HTM.
-	vmx0  = (vector __int128) {0xBABE};
+	   :
+	   : [vmx0_correct_value] "r"(vmx0_correct_value),
+             [vmx0_new_value]      "r"(vmx0_new_value)
+	   : "r3"	     
+	   : _failure, _success
+	  );
 
-
-	_ ("nop \n\t");
-
-	/*************
-	** HTM END **
-	*************/
-	_ ("tend.    \n\t");
-	_ goto ("b %l[_success] \n\t" : : : : _success);
 
 
 _failure:
 	  _ goto (
 
 	    // Check if vmx0 is sane.
-	    "stvx 1, 0, %[vmx_scratch_area]   \n\t"
-	    "lvx  1, 0, %[vmx_correct_value]  \n\t"
+	    "lvx  1, 0, %[vmx0_correct_value]  \n\t"
 	    "vcmpequb. 0, 0, 1                \n\t"
-	    "lvx  1, 0,  %[vmx_scratch_area]  \n\t"
-	    "mfvrd 5, 0                       \n\t"
-	    "li     6, 0                      \n\t"
 	    "bc   4, 24, %l[_value_mismatch]  \n\t"
 
 	    // Reach here, then all registers are sane.
 	    "b  %l[_value_match]              \n\t"
 
 	       : // no output
-	       : [offset] "r"(offset),
-	         [vmx_correct_value] "r"(vmx_correct_value),
-	         [vmx_scratch_area]  "r"(vmx_scratch_area),
-	         [vrsave_correct_value] "r"(vrsave_correct_value)
-	       : "memory", "r5", "r6"
+	       : [vmx0_correct_value] "r" (vmx0_correct_value) 
+	       : 
 	       : _value_match, _value_mismatch
 	    );
 
 _value_mismatch:
-	z = __builtin_get_texasr();
+	_texasr = __builtin_get_texasr();
 	printf("\n\n==============\n\n");
-	printf("\nFailure with error: %lx\n\n",  _TEXASR_FAILURE_CODE(z));
-	printf(": Summary error: %lx\n",  _TEXASR_FAILURE_SUMMARY(z));
-	printf(": TFIAR error: %lx\n\n", _TEXASR_TFIAR_EXACT(z));
+	printf("\nFailure with error: %lx\n\n",  _TEXASR_FAILURE_CODE(_texasr));
+	printf(": Summary error: %lx\n",  _TEXASR_FAILURE_SUMMARY(_texasr));
+	printf(": TFIAR error: %lx\n\n", _TEXASR_TFIAR_EXACT(_texasr));
 
 	_ (".long 0"); // exit with a core dump
 
