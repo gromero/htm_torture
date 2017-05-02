@@ -1,4 +1,5 @@
 #include "torture.h"
+#include<htmintrin.h>
 
 void *worker(void *arg)
 {
@@ -44,6 +45,7 @@ void *worker(void *arg)
  vector __int128 vmx_scratch_area[2];
 
  uint64_t offset = 0;
+ uint64_t z;
 
  // Expected correct values restored after a HTM failure.
  vmx_correct_value[0]  = (vector __int128) {0xBEEF}; 
@@ -484,6 +486,13 @@ _failure:
      );
 
 _value_mismatch:
+	z = __builtin_get_texasr();
+	printf("\n\n==============\n\n");
+	printf("\nFailure with error: %lx\n\n",  _TEXASR_FAILURE_CODE(z));
+	printf(": Summary error: %lx\n",  _TEXASR_FAILURE_SUMMARY(z));
+	printf(": TFIAR error: %lx\n\n", _TEXASR_TFIAR_EXACT(z));
+
+       _ (".long 0"); // exit with a core dump
         // TODO: move 'nr' and 'res' to input list in inline asm above and remove from here.
 	_ ("mr %[nr], 6 \n\t": [nr] "=r"(nr) : :);
 	_ ("mr %[res], 5 \n\t": [res] "=r"(res) : :);
