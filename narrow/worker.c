@@ -1,10 +1,13 @@
 #include <inttypes.h>
 #include <htmintrin.h>
+#include <string.h>
+#include <stdlib.h>
 #include <stdio.h>
+#include <pthread.h>
 
 #define _ asm
 
-void worker() {
+void *worker() {
 	// VMX registers.
 	register vector __int128 vmx0  asm ("vs32");
 
@@ -45,8 +48,8 @@ void worker() {
 
 
 	_ ("nop \n\t");
+
 	/*************
-	*
 	** HTM END **
 	*************/
 	_ ("tend.    \n\t");
@@ -72,8 +75,8 @@ _failure:
 	    "li     6, 0                      \n\t"
 	    "bc   4, 24, %l[_value_mismatch]  \n\t"
 
-	    // Reach here, then all registers are sane. 
-	    "b  %l[_value_match]              \n\t" 
+	    // Reach here, then all registers are sane.
+	    "b  %l[_value_match]              \n\t"
 
 	       : // no output
 	       : [offset] "r"(offset),
@@ -105,8 +108,18 @@ _finish:
 
 }
 
-int main(){
-	printf("Torture tool\n");
-	for (int i = 0 ; i < 100; i++)
-		worker();
+int main(int argc, char **argv){
+	int threads = 1024;
+
+	if (argc > 1)
+		threads = atoi(argv[1]);
+
+	printf("Torture tool starting with %d threads\n", threads);
+
+	pthread_t thread[threads];
+	for (uint64_t i = 0; i < threads; i++)
+		pthread_create(&thread[i], NULL, &worker, NULL);
+
+	for (uint64_t i = 0; i < threads; i++)
+		pthread_join(thread[i], NULL);
 }
