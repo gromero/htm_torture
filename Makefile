@@ -1,6 +1,7 @@
 LDFLAGS = -lpthread
 CC = gcc -Wno-pointer-to-int-cast
 DEBUG = -O0 -g
+DEPS = torture.h
 
 %.o: %.c $(DEPS)
 	$(CC) $(DEBUG) -c -o $@ $< $(CFLAGS)
