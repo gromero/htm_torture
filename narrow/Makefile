@@ -1,4 +1,4 @@
 all:
-	gcc worker.c -lpthread
+	gcc -O0 -g worker.c -lpthread -o worker
 clean:
 	rm -fr a.out core
