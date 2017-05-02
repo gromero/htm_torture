@@ -6,6 +6,7 @@
 #include <pthread.h>
 
 #define _ asm
+#define DEFAULT_THREADS 16384
 
 void *worker() {
 	// VMX registers.
@@ -102,7 +103,7 @@ _finish:
 }
 
 int main(int argc, char **argv){
-	int threads = 1024;
+	int threads = DEFAULT_THREADS;
 
 	if (argc > 1)
 		threads = atoi(argv[1]);
@@ -115,4 +116,6 @@ int main(int argc, char **argv){
 
 	for (uint64_t i = 0; i < threads; i++)
 		pthread_join(thread[i], NULL);
+
+	return 0;
 }
