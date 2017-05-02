@@ -1,2 +1,2 @@
 all:
-	gcc worker.c
+	gcc worker.c -lpthread
