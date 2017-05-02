@@ -19,12 +19,12 @@ void *worker() {
 	_  goto (
            "xor     3,  3, 3                      \n\t"
 	   "ori     3,  3, 48879                  \n\t" // 0xBEEF
-           "std     3,  8(%[vmx0_correct_value])  \n\t"
-	   "lxvd2x 32, 0, %[vmx0_correct_value]   \n\t" // vmx0 = 0x0000000000000000000000000000BEEF
+           "std     3,  0(%[vmx0_correct_value])  \n\t"
+	   "lvx     0,  0, %[vmx0_correct_value]  \n\t" // vmx0 = 0x0000000000000000000000000000BEEF
 
            "xor      3,  3, 3                      \n\t"
 	   "ori      3,  3, 47806                  \n\t" // 0xBABE
-	   "std      3,  8(%[vmx0_new_value])  \n\t"
+	   "std      3,  0(%[vmx0_new_value])      \n\t"
 
 	/***************
 	** HTM BEGIN **
@@ -33,13 +33,13 @@ void *worker() {
 	   "tbegin.                               \n\t"
 	   "beq     %l[_failure]                  \n\t"
            
-           "lxvd2x  32, 0, %[vmx0_new_value]      \n\t"
+           "lvx  0, 0, %[vmx0_new_value]          \n\t"
            "tend.                                 \n\t"
 	   "b     %l[_success]                    \n\t"
 
 	   :
 	   : [vmx0_correct_value] "r"(vmx0_correct_value),
-             [vmx0_new_value]      "r"(vmx0_new_value)
+             [vmx0_new_value]     "r"(vmx0_new_value)
 	   : "r3"	     
 	   : _failure, _success
 	  );
@@ -51,7 +51,7 @@ _failure:
 
 	    // Check if vmx0 is sane.
 	    "lvx  1, 0, %[vmx0_correct_value]  \n\t"
-	    "vcmpequb. 0, 0, 1                \n\t"
+	    "vcmpequb. 2, 0, 1                \n\t"
 	    "bc   4, 24, %l[_value_mismatch]  \n\t"
 
 	    // Reach here, then all registers are sane.
@@ -89,8 +89,8 @@ int main(int argc, char **argv){
 
 	if (argc > 1)
 		threads = atoi(argv[1]);
-        worker();
-	/*
+        //worker();
+
 	printf("Torture tool starting with %d threads\n", threads);
 
 	pthread_t thread[threads];
@@ -99,6 +99,6 @@ int main(int argc, char **argv){
 
 	for (uint64_t i = 0; i < threads; i++)
 		pthread_join(thread[i], NULL);
-*/
-	return 0;
+
+		return 0;
 }
