@@ -1,9 +1,10 @@
 LDFLAGS = -lpthread
 CC = gcc -Wno-pointer-to-int-cast
 DEBUG = -O0 -g
-DEPS = torture.h
+SRC = src
+DEPS = $(SRC)/torture.h
 
-%.o: %.c $(DEPS)
+%.o: $(SRC)/%.c $(DEPS)
 	$(CC) $(DEBUG) -c -o $@ $< $(CFLAGS)
 
 torture: worker.o torture.o workload.o threads.o
