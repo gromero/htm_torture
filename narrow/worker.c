@@ -8,7 +8,7 @@
 
 #define _ asm
 
-#define DEFAULT_THREADS 16384
+#define DEFAULT_THREADS 32
 
 void *worker() {
 
@@ -27,7 +27,11 @@ void *worker() {
 	   "ori      3,  3, 47806                  \n\t" // 0xBABE
 	   "std      3,  0(%[vmx0_new_value])      \n\t"
 
-
+	   "lis	     3, 0x3fff\n\t"
+	   "1:\n\t"
+	   "addi     3, 3, -1\n\t"
+	   "cmpdi    3, 0\n\t"
+	   "bne	     1b\n\t"
 	/**************
 	** HTM BEGIN **
 	***************/
