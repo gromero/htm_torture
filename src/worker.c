@@ -208,14 +208,14 @@ void *worker(void *arg)
 
 _failure:
    _ goto (
-
+/*
      // Check if VRSAVE is sane.
      "lwz      5, 0(%[vrsave_correct_value]) \n\t"
      "mfvrsave 6                             \n\t"
      "cmpd     5, 6                          \n\t"
      "li       6, 32                         \n\t"
      "bne  %l[_value_mismatch]               \n\t"
-
+*/
      // Check if vmx0 is sane.
      "stvx 1, 0, %[vmx_scratch_area]   \n\t"
      "lvx  1, 0, %[vmx_correct_value]  \n\t"

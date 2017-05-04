@@ -1,3 +1,6 @@
+#include <sys/wait.h>
+#include <sys/types.h>
+
 #include "torture.h"
 
 void register_workload(void *func, char *description) {
@@ -70,44 +73,56 @@ int main(int argc, char **argv) {
 
 	set_workloads();
 
+//      int nr_threads = THREADS / MAX_WORKLOADS;
+//      printf("Thread per worload type: %d\n", nr_threads);
 
-        int nr_threads = THREADS / MAX_WORKLOADS;
-        printf("Thread per worload type: %d\n", nr_threads);
-
-        while (1) {
+ //       while (1) {
 
         /**** WORKLOADS ****/
 
-        init_workers();
+        start_worker_process(0, 10);
+        start_worker_process(1, 10);
+          start_worker_process(7, 10); 
+          start_worker_process(2, 10);
+//        start_worker_process(3, 1024);
+//        start_worker_process(4, 1024);
+//        start_worker_process(5, 1024);
+//        start_worker_process(6, 1024);
 
-        nr_threads = 450;
+//        init_workers();
 
-        start_workers(0, nr_threads);
-        start_workers(1, nr_threads);
-        start_workers(2, nr_threads);
-        start_workers(3, nr_threads);
-        start_workers(4, nr_threads);
-        start_workers(5, nr_threads);
-        start_workers(6, nr_threads);
+//         nr_threads = 450;
+
+//        start_workers(0, nr_threads);
+//        start_workers(1, nr_threads);
+//        start_workers(2, nr_threads);
+//        start_workers(3, nr_threads);
+//        start_workers(4, nr_threads);
+//        start_workers(5, nr_threads);
+//        start_workers(6, nr_threads);
 
         // Preparation for workload7. TODO: improve argument passing to workloads like that.
-        array = (unsigned long *) calloc(ARRAY_SIZE, sizeof(unsigned long));
+//        array = (unsigned long *) calloc(ARRAY_SIZE, sizeof(unsigned long));
 
         // Fill array with pseudo-random values.
-        for (uint64_t i = 0; i < ARRAY_SIZE; i++) array[i] = rand();
+//        for (uint64_t i = 0; i < ARRAY_SIZE; i++) array[i] = rand();
 
         // Order array.
-        start_workers(7, nr_threads); //utpsm_qsort
+//        start_workers(7, nr_threads); //utpsm_qsort
+//        start_worker_process(7, 1024);
 
-        start_workers(8, nr_threads); // Illegal instruction
-        start_workers(9, nr_threads); // trap
+//        start_worker_process(8, 1024);
+//        start_worker_process(9, 1024);
+
+//        start_workers(8, nr_threads); // Illegal instruction
+//        start_workers(9, nr_threads); // trap
 
 
-        join_workers();
+//        join_workers();
 
         /*******************/
 
-        } // while (1)
+//        } // while (1)
 /*
         // Print ordered array
         for (int i = 0; i < ARRAY_SIZE; i++) printf("%ld\n", array[i]);

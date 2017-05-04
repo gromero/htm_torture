@@ -46,6 +46,8 @@ void init_workers(void);
 void start_workers(uint64_t, uint64_t);
 void join_workers(void);
 
+int start_worker_process(int, int);
+
 extern void start_threads(uint64_t threads);
 extern void *worker(void *arg);
 

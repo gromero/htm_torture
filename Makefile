@@ -1,5 +1,5 @@
 LDFLAGS = -lpthread
-CC = gcc -Wno-pointer-to-int-cast
+CC = gcc -Wno-pointer-to-int-cast -Wno-int-to-pointer-cast
 DEBUG = -O0 -g
 SRC = src
 DEPS = $(SRC)/torture.h
@@ -7,11 +7,11 @@ DEPS = $(SRC)/torture.h
 %.o: $(SRC)/%.c $(DEPS)
 	$(CC) $(DEBUG) -c -o $@ $< $(CFLAGS)
 
-torture: worker.o torture.o workload.o threads.o
-	$(CC) $(DEBUG) -o torture worker.o torture.o workload.o threads.o $(LDFLAGS)
+torture: worker.o torture.o workload.o threads.o process.o
+	$(CC) $(DEBUG) -o torture worker.o torture.o workload.o threads.o process.o $(LDFLAGS)
 
 asm:
-	gcc -S -fverbose-asm worker.c torture.c workload.c threads.c
+	gcc -S -fverbose-asm worker.c torture.c workload.c threads.c process.c
 
 z: z.c
 	$(CC) $(DEBUG) z.c -o z
