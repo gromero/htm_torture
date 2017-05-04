@@ -1,3 +1,14 @@
+#include <sys/ipc.h>
+#include <sys/shm.h>
+// #include <stdio.h>
+// #include <stdlib.h>
+// #include <unistd.h>
+
+// #include <inttypes.h>
+// #include <htmintrin.h>
+//#include <string.h>
+// #include <sys/mman.h>
+
 #include <sys/wait.h>
 #include <sys/types.h>
 
@@ -73,6 +84,28 @@ int main(int argc, char **argv) {
 
 	set_workloads();
 
+
+
+
+     int shmid;
+     key_t key;
+     char *shm, *s;
+
+     key = 5678;
+
+     if ((shmid = shmget(key, ARRAY_SIZE, IPC_CREAT | 0666)) < 0) {
+         perror("shmget");
+         exit(1);
+     }
+     
+     if ((shm = shmat(shmid, NULL, 0)) == (char *) -1) {
+         perror("shmat");
+         exit(1);
+     }
+     
+     s = shm;
+
+
 //      int nr_threads = THREADS / MAX_WORKLOADS;
 //      printf("Thread per worload type: %d\n", nr_threads);
 
@@ -102,8 +135,8 @@ int main(int argc, char **argv) {
 //        start_workers(6, nr_threads);
 
         // Preparation for workload7. TODO: improve argument passing to workloads like that.
-         array = (unsigned long *) calloc(ARRAY_SIZE, sizeof(unsigned long));
-
+//         array = (unsigned long *) calloc(ARRAY_SIZE, sizeof(unsigned long));
+         array = (unsigned long *) s;   
         // Fill array with pseudo-random values.
          for (uint64_t i = 0; i < ARRAY_SIZE; i++) array[i] = rand();
 
