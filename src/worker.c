@@ -3,7 +3,7 @@
 
 void *worker(void *arg)
 {
- // VSX registers. To be used in the future.
+while(1) { // VSX registers. To be used in the future.
  register vector __int128 vsx0 asm ("vs0");
  register vector __int128 vsx1 asm ("vs1");
 
@@ -522,5 +522,5 @@ _success:
 
 _finish:
 	_ ("nop"); // Can't label in the void...
-
+}
 }
