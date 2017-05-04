@@ -80,14 +80,14 @@ int main(int argc, char **argv) {
 
         /**** WORKLOADS ****/
 
-        start_worker_process(0, 10);
-        start_worker_process(1, 10);
-          start_worker_process(7, 10); 
-          start_worker_process(2, 10);
-//        start_worker_process(3, 1024);
-//        start_worker_process(4, 1024);
-//        start_worker_process(5, 1024);
-//        start_worker_process(6, 1024);
+        start_worker_process(0, 2);
+        start_worker_process(1, 2);
+//          start_worker_process(7, 10); 
+         start_worker_process(2, 2);
+        start_worker_process(3, 2);
+        start_worker_process(4, 2);
+        start_worker_process(5, 2);
+        start_worker_process(6, 2);
 
 //        init_workers();
 
@@ -102,17 +102,17 @@ int main(int argc, char **argv) {
 //        start_workers(6, nr_threads);
 
         // Preparation for workload7. TODO: improve argument passing to workloads like that.
-//        array = (unsigned long *) calloc(ARRAY_SIZE, sizeof(unsigned long));
+         array = (unsigned long *) calloc(ARRAY_SIZE, sizeof(unsigned long));
 
         // Fill array with pseudo-random values.
-//        for (uint64_t i = 0; i < ARRAY_SIZE; i++) array[i] = rand();
+         for (uint64_t i = 0; i < ARRAY_SIZE; i++) array[i] = rand();
 
         // Order array.
 //        start_workers(7, nr_threads); //utpsm_qsort
-//        start_worker_process(7, 1024);
+        start_worker_process(7, 2);
 
-//        start_worker_process(8, 1024);
-//        start_worker_process(9, 1024);
+       start_worker_process(8, 2);
+        start_worker_process(9, 2);
 
 //        start_workers(8, nr_threads); // Illegal instruction
 //        start_workers(9, nr_threads); // trap
