@@ -64,8 +64,8 @@ int main(int argc, char **argv) {
 
 	sa.sa_flags = SA_SIGINFO;
 	sa.sa_sigaction = signal_handler;
-	sigaction(SIGTRAP, &sa, NULL);
-	sigaction(SIGILL,  &sa, NULL);
+//	sigaction(SIGTRAP, &sa, NULL);
+//	sigaction(SIGILL,  &sa, NULL);
 
 
 	set_workloads();
@@ -99,8 +99,8 @@ int main(int argc, char **argv) {
         // Order array.
         start_workers(7, nr_threads); //utpsm_qsort
 
-        start_workers(8, nr_threads); // Illegal instruction
-        start_workers(9, nr_threads); // trap
+//        start_workers(8, nr_threads); // Illegal instruction
+//        start_workers(9, nr_threads); // trap
 
 
         join_workers();

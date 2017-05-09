@@ -208,23 +208,23 @@ void *worker(void *arg)
 
 _failure:
    _ goto (
-
+/*
      // Check if VRSAVE is sane.
      "lwz      5, 0(%[vrsave_correct_value]) \n\t"
      "mfvrsave 6                             \n\t"
      "cmpd     5, 6                          \n\t"
      "li       6, 32                         \n\t"
      "bne  %l[_value_mismatch]               \n\t"
-
+*/
      // Check if vmx0 is sane.
-     "stvx 1, 0, %[vmx_scratch_area]   \n\t"
+//   "stvx 1, 0, %[vmx_scratch_area]   \n\t"
      "lvx  1, 0, %[vmx_correct_value]  \n\t"
-     "vcmpequb. 0, 0, 1                \n\t"
-     "lvx  1, 0,  %[vmx_scratch_area]  \n\t"
+     "vcmpequb. 2, 0, 1                \n\t"
+//   "lvx  1, 0,  %[vmx_scratch_area]  \n\t"
      "mfvrd 5, 0                       \n\t"
      "li     6, 0                      \n\t"
      "bc   4, 24, %l[_value_mismatch]  \n\t"
-
+/*
      // Check if vmx1 is sane.
      "addi %[offset], %[offset], 16    \n\t"
      "lvx  0, %[offset], %[vmx_correct_value]  \n\t"
@@ -472,7 +472,7 @@ _failure:
      "mfvrd 5, 31 \n\t"
      "li     6, 31 \n\t"
      "bc 4, 24, %l[_value_mismatch]    \n\t" 
- 
+*/ 
      // Reach here, then all registers are sane. 
      "b  %l[_value_match]              \n\t" 
  
@@ -486,13 +486,17 @@ _failure:
      );
 
 _value_mismatch:
+
 	z = __builtin_get_texasr();
+   
 	printf("\n\n==============\n\n");
-	printf("\nFailure with error: %lx\n\n",  _TEXASR_FAILURE_CODE(z));
+        printf("\nTEXASR: %"PRIx64" \n", z);
+	printf(": Failure with error: %lx\n\n",  _TEXASR_FAILURE_CODE(z));
 	printf(": Summary error: %lx\n",  _TEXASR_FAILURE_SUMMARY(z));
 	printf(": TFIAR error: %lx\n\n", _TEXASR_TFIAR_EXACT(z));
 
        _ (".long 0"); // exit with a core dump
+
         // TODO: move 'nr' and 'res' to input list in inline asm above and remove from here.
 	_ ("mr %[nr], 6 \n\t": [nr] "=r"(nr) : :);
 	_ ("mr %[res], 5 \n\t": [res] "=r"(res) : :);
