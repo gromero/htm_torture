@@ -18,7 +18,7 @@ int fib(int x){
 /* Run a fibonnaci of 40 inside transaction */
 void workload1() {
 	int sum;
-	int n = 40;
+	int n = 42;
 
 	sum = fib(n);
 }

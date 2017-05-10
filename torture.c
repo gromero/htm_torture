@@ -82,22 +82,22 @@ int main(int argc, char **argv) {
 
         nr_threads = 450;
 
-        start_workers(0, nr_threads);
+//        start_workers(0, nr_threads);
         start_workers(1, nr_threads);
-        start_workers(2, nr_threads);
-        start_workers(3, nr_threads);
-        start_workers(4, nr_threads);
-        start_workers(5, nr_threads);
-        start_workers(6, nr_threads);
+//        start_workers(2, nr_threads);
+//        start_workers(3, nr_threads);
+//        start_workers(4, nr_threads);
+//        start_workers(5, nr_threads);
+//        start_workers(6, nr_threads);
 
         // Preparation for workload7. TODO: improve argument passing to workloads like that.
-        array = (unsigned long *) calloc(ARRAY_SIZE, sizeof(unsigned long));
+//        array = (unsigned long *) calloc(ARRAY_SIZE, sizeof(unsigned long));
 
         // Fill array with pseudo-random values.
-        for (uint64_t i = 0; i < ARRAY_SIZE; i++) array[i] = rand();
+//        for (uint64_t i = 0; i < ARRAY_SIZE; i++) array[i] = rand();
 
         // Order array.
-        start_workers(7, nr_threads); //utpsm_qsort
+//        start_workers(7, nr_threads); //utpsm_qsort
 
 //        start_workers(8, nr_threads); // Illegal instruction
 //        start_workers(9, nr_threads); // trap
