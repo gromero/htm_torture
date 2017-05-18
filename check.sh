@@ -1,6 +1,6 @@
 #!/bin/bash
 
-timeout 60 ./torture &>/dev/null
+timeout 60 ./git/htm_torture/torture &>/dev/null
 ERROR=$?
 
 if [ $ERROR -eq 124 ]; then
@@ -10,5 +10,6 @@ elif [ $ERROR -eq 132 ]; then
 echo "Kernel is buggy..."
 exit 1
 else
-echo "Unknown error. Check script!"
+echo "Unknown error: $ERROR. Check script!"
+exit $ERROR
 fi
