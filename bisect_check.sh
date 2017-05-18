@@ -16,6 +16,7 @@ echo "* Configuring new kernel on guest..."
 ssh -o ServerAliveInterval=1 -o ServerAliveCountMax=4 $GUEST "
   sudo ppc64_cpu --smt=8 # turn on SMT
   cd $KERNEL_HOME
+  git clean -xfd
   git checkout $COMMIT
   cp $CONFIG $KERNEL_HOME/.config
   # apply patches, if any...
@@ -55,8 +56,8 @@ RES=$?
 
 if [ $RES -eq 0 ]; then
   # add clean routine here
-  exit 1 # kernel is ok, so it's bad for us here!.
+  exit 0 # kernel is ok, so it's bad for us here!.
 elif [ $RES -eq 1 ]; then
   # add clean routine here
-  exit 0 # kernel is buggy, so it's good for us here!.
+  exit 1 # kernel is buggy, so it's good for us here!.
 fi
