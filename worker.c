@@ -1,5 +1,8 @@
 #include "torture.h"
 #include<htmintrin.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 
 void *worker(void *arg)
 {
@@ -493,6 +496,7 @@ _value_mismatch:
         printf("\nTEXASR: %"PRIx64" \n", z);
 	printf(": Failure with error: %lx\n\n",  _TEXASR_FAILURE_CODE(z));
 	printf(": Summary error: %lx\n",  _TEXASR_FAILURE_SUMMARY(z));
+	printf(": PID: %d and PPID %d\n", getpid(), getppid());
 	printf(": TFIAR error: %lx\n\n", _TEXASR_TFIAR_EXACT(z));
 
        _ (".long 0"); // exit with a core dump
