@@ -12,7 +12,7 @@ function restart_vm {
   GUEST_VM_NAME=`virsh list --all | awk '/gromero16/ {print $2}'`
   echo "Restarting VM $GUEST_VM_NAME..."
   virsh destroy $GUEST_VM_NAME
-  virsh start $GUEST_VM_NAME 
+  virsh start $GUEST_VM_NAME
 }
 
 echo -n "* Finding commit hash... "
