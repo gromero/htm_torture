@@ -1,5 +1,14 @@
 #!/bin/bash
+################################
+#### TO BE USED IN THE HOST ####
+################################
 
+# This script will build and test a kernel version on a guest
+# accordingly to the same current commit found the kernel's git
+# tree on the host.
+
+# All variables below are relative to the guest. i.e paths specified
+# below *must* exist in the guest properly.
 CONFIG=/home/gromero/config-kernel
 KERNEL_HOME=/home/gromero/git/linux
 PATCH_HOME=/home/gromero/kernel/patches
@@ -28,9 +37,9 @@ ssh -o ServerAliveInterval=1 -o ServerAliveCountMax=1 $GUEST "
   git checkout $COMMIT
   cp $CONFIG $KERNEL_HOME/.config
   # apply patches, if any...
-  for patch in \`find /home/gromero/kernel/patches -type f\`; do patch -p1 < \$patch; done 
+  for patch in \`find /home/gromero/kernel/patches -type f\`; do patch -p1 < \$patch; done
   make localmodconfig
-  make olddefconfig 
+  make olddefconfig
 "
 
 echo "* Adjusting CONFIG_LOCALVERSION=$COMMIT..."
@@ -68,7 +77,7 @@ timeout 60 ssh $GUEST sudo ppc64_cpu --smt=off
 if [ $? -eq 124 ]; then
   echo "* Connection to VM failed after reboot, marking that kernel as bad..."
   restart_vm $GUEST
-  exit 1 # exit as bad 
+  exit 1 # exit as bad
 fi
 
 echo "* Checking bug..."
