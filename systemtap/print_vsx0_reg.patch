@@ -1,0 +1,85 @@
+diff --git a/doc/SystemTap_Tapset_Reference/tapsets.pdf b/doc/SystemTap_Tapset_Reference/tapsets.pdf
+deleted file mode 100644
+index 9649e6d..0000000
+Binary files a/doc/SystemTap_Tapset_Reference/tapsets.pdf and /dev/null differ
+diff --git a/runtime/linux/regs.c b/runtime/linux/regs.c
+index 6573967..f48e471 100644
+--- a/runtime/linux/regs.c
++++ b/runtime/linux/regs.c
+@@ -163,7 +163,52 @@ static void _stp_print_regs(struct pt_regs * regs)
+ static void _stp_print_regs(struct pt_regs * regs)
+ {
+ 	int i;
+-
++        uint64_t msr;
++        uint64_t msr_saved;
++        uint64_t high_chunk=1; // GPRx
++        uint64_t low_chunk=2;  // GPRy
++
++__asm__(
++       "mfmsr %[msr];"
++       : [msr] "=r" (msr)
++       :
++       :
++       );
++
++       msr_saved = msr;
++       msr = msr + 0x2802000; // set MSR_FP + MSR_VEC | MSR_VSX to avoid interruptions
++
++__asm__(
++       "mtmsr %[msr];"
++       "isync       ;" // take effect
++       :
++       : [msr] "r" (msr)
++       :
++       );
++
++__asm__(
++     "mfvsrd %[high_chunk], 0;"
++     "xxsldwi 3, 0, 0, 2;"
++     "mfvsrd %[low_chunk], 3  ;"
++
++     :    [high_chunk] "=r"(high_chunk),
++          [low_chunk]  "=r"(low_chunk)
++     :
++     :
++     );
++
++__asm__(
++        "mtmsr %[msr_saved];"
++        "isync;             "
++        :
++        : [msr_saved] "r" (msr_saved)
++        :
++      );
++
++
++        _stp_printf("vsx0: 0x%016lx%016lx\n", high_chunk, low_chunk);
++//      _stp_printf("LOW_CHUNK:   %.16lx\n", low_chunk);
++/*
+ 	_stp_printf("NIP: %016lX XER: %08X LR: %016lX CTR: %016lX\n",
+ 	       regs->nip, (unsigned int)regs->xer, regs->link, regs->ctr);
+ 	_stp_printf("REGS: %016lx TRAP: %04lx\n", (long)regs, regs->trap);
+@@ -171,11 +216,11 @@ static void _stp_print_regs(struct pt_regs * regs)
+ 			regs->msr, (unsigned int)regs->ccr);
+ 	_stp_printf("DAR: %016lx DSISR: %016lx\n",
+ 		       	regs->dar, regs->dsisr);
+-
++*/
+ #ifdef CONFIG_SMP
+-	_stp_printf(" CPU: %d", smp_processor_id());
++//	_stp_printf(" CPU: %d", smp_processor_id());
+ #endif /* CONFIG_SMP */
+-
++/*
+ 	for (i = 0; i < 32; i++) {
+ 		if ((i % 4) == 0) {
+ 			_stp_printf("\n GPR%02d: ", i);
+@@ -187,6 +232,7 @@ static void _stp_print_regs(struct pt_regs * regs)
+ 	}
+ 	_stp_printf("\nNIP [%016lx] ", regs->nip);
+ 	_stp_printf("LR [%016lx]\n", regs->link);
++*/
+ }
+ 
+ #elif defined (__aarch64__)
