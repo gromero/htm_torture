@@ -1,0 +1,66 @@
+From e75c9080b12938c9c7114b1e2aa37763b3f6ea8e Mon Sep 17 00:00:00 2001
+From: Gustavo Romero <gusbromero@gmail.com>
+Date: Mon, 29 May 2017 00:24:37 -0400
+Subject: [PATCH] Fix broken HTM even after Mikey's patch
+
+---
+ arch/powerpc/kernel/process.c | 20 ++++++++++++++++++++
+ arch/powerpc/kernel/traps.c   |  4 +++-
+ 2 files changed, 23 insertions(+), 1 deletion(-)
+
+diff --git a/arch/powerpc/kernel/process.c b/arch/powerpc/kernel/process.c
+index 5dd056d..0282e4d 100644
+--- a/arch/powerpc/kernel/process.c
++++ b/arch/powerpc/kernel/process.c
+@@ -839,6 +839,26 @@ static void tm_reclaim_thread(struct thread_struct *thr,
+ 	if (!MSR_TM_SUSPENDED(mfmsr()))
+ 		return;
+ 
++	/*
++	* If we are in a transaction and FP is off then we can't have
++	* used FP inside that transaction. Hence the checkpointed
++	* state is the same as the live state. We need to copy the
++	* live state to the checkpointed state so that when the
++	* transaction is restored, the checkpointed state is correct
++	* and the aborted transaction sees the correct state.  We use
++	* ckpt_regs.msr here as that's what tm_reclaim will use to
++	* determine if it's going to write the checkpointed state or
++	* not. So either this will write the checkpointed registers,
++	* or reclaim will.  Similarly for VMX.
++	*/
++	if ((thr->ckpt_regs.msr & MSR_FP) == 0)
++	memcpy(&thr->ckfp_state, &thr->fp_state,
++	      sizeof(struct thread_fp_state));
++	if ((thr->ckpt_regs.msr & MSR_VEC) == 0)
++	memcpy(&thr->ckvr_state, &thr->vr_state,
++	      sizeof(struct thread_vr_state));
++
++
+ 	giveup_all(container_of(thr, struct task_struct, thread));
+ 
+ 	tm_reclaim(thr, thr->ckpt_regs.msr, cause);
+diff --git a/arch/powerpc/kernel/traps.c b/arch/powerpc/kernel/traps.c
+index e6cc56b..646ea91 100644
+--- a/arch/powerpc/kernel/traps.c
++++ b/arch/powerpc/kernel/traps.c
+@@ -1617,6 +1617,8 @@ void vsx_unavailable_tm(struct pt_regs *regs)
+ 		 regs->nip, regs->msr);
+ 
+ 	current->thread.used_vsr = 1;
++        current->thread.load_fp++;
++        current->thread.load_vec++;
+ 
+ 	/* If FP and VMX are already loaded, we have all the state we need */
+ 	if ((orig_msr & (MSR_FP | MSR_VEC)) == (MSR_FP | MSR_VEC)) {
+@@ -1633,7 +1635,7 @@ void vsx_unavailable_tm(struct pt_regs *regs)
+ 	/* This loads & recheckpoints FP and VRs; but we have
+ 	 * to be sure not to overwrite previously-valid state.
+ 	 */
+-	tm_recheckpoint(&current->thread, regs->msr & ~orig_msr);
++	tm_recheckpoint(&current->thread, MSR_FP | MSR_VEC);
+ 
+ 	msr_check_and_set(orig_msr & (MSR_FP | MSR_VEC));
+ 
+-- 
+2.7.4
+
