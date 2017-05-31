@@ -51,7 +51,8 @@ void *worker(void *arg)
  uint64_t z;
 
  // Expected correct values restored after a HTM failure.
- vmx_correct_value[0]  = (vector __int128) {0xBEEF}; 
+ vmx_correct_value[0]  = (vector __int128) {0xBEEF}; // <=== WILL BE REPLACED BY ASM CODE!
+
  vmx_correct_value[1]  = (vector __int128) {0xBEEF};
  vmx_correct_value[2]  = (vector __int128) {0xBEEF};
  vmx_correct_value[3]  = (vector __int128) {0xBEEF};
@@ -92,7 +93,8 @@ void *worker(void *arg)
  // Values below must match the expected correct values after a HTM failure,
  // as specified in the code section above. TODO: add random generated value as
  // the expected correct values to torture kernel VMX restore code.
- vmx0  = (vector __int128) {0xBEEF};
+ vmx0  = (vector __int128) {0xBEEF}; // <=== WILL BE REPLACED BY ASM CODE!
+
  vmx1  = (vector __int128) {0xBEEF};
  vmx2  = (vector __int128) {0xBEEF};
  vmx3  = (vector __int128) {0xBEEF};
@@ -124,6 +126,40 @@ void *worker(void *arg)
  vmx29 = (vector __int128) {0xBEEF};
  vmx30 = (vector __int128) {0xBEEF};
  vmx31 = (vector __int128) {0xBEEF};
+
+ uint64_t high; // High 64bit (MSB)
+ uint64_t low;  // Low  64bit (LSB)
+
+ _ (
+    // r3 = 0x5555555555555555
+    "lis  %[high], 0x5555                  ;"
+    "ori  %[high], %[high], 0x5555         ;"
+    "sldi %[high], %[high], 32             ;"
+    "oris %[high], %[high], 0x5555         ;"
+    "ori  %[high], %[high], 0x5555         ;"
+
+    // r4 = 0xFFFFFFFFFFFFFFFF
+    "lis  %[low], 0xFFFF                   ;"
+    "ori  %[low], %[low], 0xFFFF           ;"
+    "sldi %[low], %[low], 32               ;"
+    "oris %[low], %[low], 0xFFFF           ;"
+    "ori  %[low], %[low], 0xFFFF           ;"
+    "mtvsrd 3, %[high]                     ;"
+    "mtvsrd 4, %[low]                      ;"
+
+    // VSR32 (VSX) = VR0 (VMX/Altivec) = 0x5555555555555555555FFFFFFFFFFFFFFFF
+    "xxmrghd 32, 3, 4                       ;"
+
+    // Update vmx_correct_value
+    "stvx 0, 0, %[vmx_correct_value]       ;"
+
+    : // no  output
+    : [vmx_correct_value] "r" (vmx_correct_value),
+      [high] "r" (high),
+      [low]  "r" (low)
+    :
+    );
+
 
  // Set value for VRSAVE register just before entering in HTM block.
  _ ("lwz 5, 0(%[vrsave_correct_value]) \n\t"
