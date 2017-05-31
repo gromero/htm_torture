@@ -1,6 +1,6 @@
 probe kernel.function("vsx_unavailable_tm").call {
   if (execname() == "torture") {
-    printf("vsx_unavailable_tm.call cpuid: %ld  tid: %ld, "
+    printf("vsx_unavailable_tm.call    cpuid: %ld  tid: %ld "
                                                        ""
                                             "load_fp=%p "
                                            "load_vec=%p "
@@ -69,7 +69,7 @@ probe kernel.function("vsx_unavailable_tm").call {
 
 probe kernel.function("vsx_unavailable_tm").return {
   if (execname() == "torture") {
-    printf("vsx_unavailable_tm.call cpuid: %ld  tid: %ld, "
+    printf("vsx_unavailable_tm.return  cpuid: %ld  tid: %ld "
                                                        ""
                                             "load_fp=%p "
                                            "load_vec=%p "
@@ -137,7 +137,7 @@ probe kernel.function("vsx_unavailable_tm").return {
 
 probe kernel.function("__switch_to").call {
   if (execname() == "torture") {
-    printf("vsx_unavailable_tm.call cpuid: %ld  tid: %ld, "
+    printf("__switch_to.call           cpuid: %ld  tid: %ld "
                                                        ""
                                             "load_fp=%p "
                                            "load_vec=%p "
@@ -204,7 +204,7 @@ probe kernel.function("__switch_to").call {
 }
 probe kernel.function("__switch_to").return {
   if (execname() == "torture") {
-    printf("vsx_unavailable_tm.call cpuid: %ld  tid: %ld, "
+    printf("__switch_to.return         cpuid: %ld  tid: %ld "
                                                        ""
                                             "load_fp=%p "
                                            "load_vec=%p "
@@ -272,7 +272,7 @@ probe kernel.function("__switch_to").return {
 
 probe kernel.function("restore_fp").inline {
   if (execname() == "torture") {
-    printf("vsx_unavailable_tm.call cpuid: %ld  tid: %ld, "
+    printf("restore_fp.inline          cpuid: %ld  tid: %ld "
                                                        ""
                                             "load_fp=%p "
                                            "load_vec=%p "
