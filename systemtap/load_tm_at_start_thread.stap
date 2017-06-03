@@ -1,0 +1,33 @@
+probe kernel.function("__switch_to"){
+	  if (execname() == "fp_torture") {
+		printf("__switch_to :  cpuid: %ld  tid: %ld "
+                                                       ""
+                                            "load_fp=%p "
+                                            "load_tm=%p "
+                                           "load_vec=%p \n",
+
+                                             cpu(), tid(),
+
+                          task_current()->thread->load_fp,
+                          task_current()->thread->load_tm,
+                         task_current()->thread->load_vec);
+	  }
+}
+
+
+
+probe kernel.function("start_thread").return {
+	  if (execname() == "fp_torture") {
+		printf("start_thread.return :  cpuid: %ld  tid: %ld "
+                                                       ""
+                                            "load_fp=%p "
+                                            "load_tm=%p "
+                                           "load_vec=%p \n",
+
+                                             cpu(), tid(),
+
+                          task_current()->thread->load_fp,
+                          task_current()->thread->load_tm,
+                         task_current()->thread->load_vec);
+	  }
+}
