@@ -27,6 +27,12 @@ altivec_una:	altivec_una.c
 	as -mpwr8 altivec_una.s -o altivec_una.o
 	ld -static altivec_una.o -o altivec_una
 
+vsx_una:	vsx_una.c
+	gcc -S -O0 vsx_una.c
+	sed -i 's/main/_start/g' vsx_una.s
+	as -mpwr8 vsx_una.s -o vsx_una.o
+	ld -static vsx_una.o -o vsx_una
+
 all: torture
 
 clean:
