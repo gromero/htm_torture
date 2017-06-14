@@ -1,9 +1,11 @@
-diff --git a/doc/SystemTap_Tapset_Reference/tapsets.pdf b/doc/SystemTap_Tapset_Reference/tapsets.pdf
-deleted file mode 100644
-index 9649e6d..0000000
-Binary files a/doc/SystemTap_Tapset_Reference/tapsets.pdf and /dev/null differ
+From 4aacad2e7dfed942fe02a735a9a061a0ac107f82 Mon Sep 17 00:00:00 2001
+From: Gustavo Romero <gusbromero@gmail.com>
+Date: Sun, 28 May 2017 16:23:17 -0400
+Subject: [PATCH] Print vsx32 (128bit register)
+
+
 diff --git a/runtime/linux/regs.c b/runtime/linux/regs.c
-index 6573967..f48e471 100644
+index 6573967..87c6494 100644
 --- a/runtime/linux/regs.c
 +++ b/runtime/linux/regs.c
 @@ -163,7 +163,52 @@ static void _stp_print_regs(struct pt_regs * regs)
@@ -35,8 +37,8 @@ index 6573967..f48e471 100644
 +       );
 +
 +__asm__(
-+     "mfvsrd %[high_chunk], 0;"
-+     "xxsldwi 3, 0, 0, 2;"
++     "mfvsrd %[high_chunk], 32;"
++     "xxsldwi 3, 32, 32, 2;"
 +     "mfvsrd %[low_chunk], 3  ;"
 +
 +     :    [high_chunk] "=r"(high_chunk),
@@ -83,3 +85,6 @@ index 6573967..f48e471 100644
  }
  
  #elif defined (__aarch64__)
+-- 
+2.7.4
+
