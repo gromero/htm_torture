@@ -12,8 +12,6 @@ void *ping(void *not_used)
 uint64_t high; // aux register to keep high 64bit (MSB) of a 128bit VSX register
 uint64_t low;  // aux register to keep low 64bit (LSB) of a 128bit VSX register
 
-sleep(1); // wait thread to be renamed to "ping". it's not necessary to reproduce the issue, but it's easier to install a selective stap probe using execname() == "ping".
-
 asm (
    // r3 = 0x5555555555555555
    "lis  %[high], 0x5555                  ;"
@@ -50,15 +48,16 @@ asm (
    :
    );
 
+// Wait an amount of context switches so load_fp and load_vec overflow and MSR.[FP VEC VSX| = 0
 uint64_t i;
-for(i=0; i<1024*1024*512; i++); // wait an amount of context switches so load_fp and load_vec overflows and MSR.[FP|VEC|VSX] = 0
+for(i=0; i<1024*1024*512; i++);
 
 #ifdef MSR_VEC
  asm("vaddcuw 0, 0, 0;"); // set MSR.VEC = 1 before provoking a VSX unavailable in transactional mode.
 #endif
 
 #ifdef MSR_FP
-asm("fadd    0, 0, 0;"); // set MSR.FP = 1 before provoking a VSX unavailable in transaction mode.
+ asm("fadd    0, 0, 0;"); // set MSR.FP = 1 before provoking a VSX unavailable in transaction mode.
 #endif
 
 
@@ -78,8 +77,9 @@ asm(
 
 void *pong(void *not_used)
 {
- sleep(1); // wait pthread to be renamed to "pong". it's not necessary to reproduce the issue, but it's easier to install a selective probe using execname() == "pong".
- while(1) { sched_yield(); } // pong
+ // pong
+ while(1)
+  sched_yield();
 }
 
 
@@ -89,11 +89,11 @@ int main(int argc, char **argv)
  pthread_attr_t attr;
  cpu_set_t cpuset;
 
- // Set only CPU 0 in the mask. Both thread will be bind to cpu 0
+ // Set only CPU 0 in the mask. Both threads will be bound to cpu 0.
  CPU_ZERO(&cpuset);
  CPU_SET(0, &cpuset);
 
- // init pthread attribute
+ // Init pthread attribute.
  pthread_attr_init(&attr);
 
  // Set CPU 0 mask into the pthread attribute
