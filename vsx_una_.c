@@ -54,11 +54,11 @@ uint64_t i;
 for(i=0; i<1024*1024*512; i++); // wait an amount of context switches so load_fp and load_vec overflows and MSR.[FP|VEC|VSX] = 0
 
 #ifdef MSR_VEC
- asm("vaddcuw 0, 0, 0;"); // set MSR.VEC = 1 before provoking a VSX unavailable in transactional mode.
+ asm("vaddcuw 10, 10, 10;"); // set MSR.VEC = 1 before provoking a VSX unavailable in transactional mode.
 #endif
 
 #ifdef MSR_FP
-asm("fadd    0, 0, 0;"); // set MSR.FP = 1 before provoking a VSX unavailable in transaction mode.
+asm("fadd    10, 10, 10;"); // set MSR.FP = 1 before provoking a VSX unavailable in transaction mode.
 #endif
 
 
