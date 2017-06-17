@@ -53,11 +53,11 @@ uint64_t i;
 for(i=0; i<1024*1024*512; i++);
 
 #ifdef MSR_VEC
- asm("vaddcuw 0, 0, 0;"); // set MSR.VEC = 1 before provoking a VSX unavailable in transactional mode.
+ asm("vaddcuw 10, 10, 10;"); // set MSR.VEC = 1 before provoking a VSX unavailable in transactional mode.
 #endif
 
 #ifdef MSR_FP
- asm("fadd    0, 0, 0;"); // set MSR.FP = 1 before provoking a VSX unavailable in transaction mode.
+ asm("fadd    10, 10, 10;"); // set MSR.FP = 1 before provoking a VSX unavailable in transaction mode.
 #endif
 
 
