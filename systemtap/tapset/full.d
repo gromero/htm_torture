@@ -21,11 +21,18 @@ function pp(function_name: string)
   regs_msr      = task_current()->thread->regs->msr
   ckpt_regs_msr = task_current()->thread->ckpt_regs->msr
 
-  vr_state_vr0_LOW  = kernel_long((task_current()->thread->vr_state->vr)+0)
-  vr_state_vr0_HIGH = kernel_long((task_current()->thread->vr_state->vr)+8)
+  vr_state_vr0_LOW  = kernel_long((task_current()->thread->vr_state->vr)+16*0+0)
+  vr_state_vr0_HIGH = kernel_long((task_current()->thread->vr_state->vr)+16*0+8)
+  //                                                 index      ------------^
 
-  ckvr_state_vr0_LOW  = kernel_long((task_current()->thread->ckvr_state->vr)+0)
-  ckvr_state_vr0_HIGH = kernel_long((task_current()->thread->ckvr_state->vr)+8)
+  fp_state_fpr0_LOW  = kernel_long((task_current()->thread->fp_state->fpr)+16*0+0)
+  fp_state_fpr0_HIGH = kernel_long((task_current()->thread->fp_state->fpr)+16*0+8)
+
+  ckvr_state_vr0_LOW  = kernel_long((task_current()->thread->ckvr_state->vr)+16*0+0)
+  ckvr_state_vr0_HIGH = kernel_long((task_current()->thread->ckvr_state->vr)+16*0+8)
+
+  ckfp_state_fpr0_LOW  = kernel_long((task_current()->thread->ckfp_state->fpr)+16*0+0)
+  ckfp_state_fpr0_HIGH = kernel_long((task_current()->thread->ckfp_state->fpr)+16*0+8)
 
   printf("%s:  cpu: %3ld tid: %6ld ", function_name, cpu(), tid())
 
@@ -52,11 +59,17 @@ function pp(function_name: string)
                                                                  ckpt_regs_msr & (1 << 33 | 1 << 34) ? (ckpt_regs_msr & ( 1 << 33 | 1 << 34)) >> 33 : 0, // MSR_TS (2 bits)
                                                                  ckpt_regs_msr & 1 << 32 ? 1 : 0) // MSR_TM
 
-  printf("vr_state.vr[0]=0x%.16x%.16x ",    vr_state_vr0_HIGH  , vr_state_vr0_LOW)
+  printf("fp_state.fpr[0]=0x%.16x%.16x ",    fp_state_fpr0_HIGH,   fp_state_fpr0_LOW)
 
-  printf("ckvr_state.vr[0]=0x%.16x%.16x ", ckvr_state_vr0_HIGH, ckvr_state_vr0_LOW)
+  printf("vr_state.vr[0]=0x%.16x%.16x ",     vr_state_vr0_HIGH,    vr_state_vr0_LOW)
+
+  printf("ckfp_state.fpr[0]=0x%.16x%.16x ",  ckfp_state_fpr0_HIGH, ckfp_state_fpr0_LOW)
+
+  printf("ckvr_state.vr[0]=0x%.16x%.16x ",   ckvr_state_vr0_HIGH,  ckvr_state_vr0_LOW)
 
   // Print vsx32 (vmx0). It must be the last printing since it contains the \n.
+  // The hackish systemtap patch to print 128bit registers must be applied to use
+  // print_regs() here.
   print_regs()
  }
 }
@@ -144,3 +157,4 @@ probe kernel.function("vsx_unavailable_tm").call          { pp("vsx_unavailable_
 probe kernel.function("vsx_unavailable_tm").return        { pp("vsx_unavailable_tm.return       ") }
 probe kernel.function("restore_math").call                { pp("restore_math.call               ") }
 probe kernel.function("restore_math").return              { pp("restore_math.return             ") }
+//probe kernel.statement(0xc000000000051258).absolute       { pp("tm_reclaim.just_after_reclaim   ") }
