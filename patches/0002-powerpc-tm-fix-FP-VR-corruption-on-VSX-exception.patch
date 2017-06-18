@@ -1,0 +1,87 @@
+From b23abc4ac1783e959be904751fb72088c44a72d7 Mon Sep 17 00:00:00 2001
+From: Gustavo Romero <gromero@linux.vnet.ibm.com>
+Date: Sat, 17 Jun 2017 18:20:33 -0400
+Subject: [PATCH 2/2] powerpc/tm: fix FP/VR corruption on VSX exception
+
+Currently there is a corner case when FP or VR registers can get corrupted
+if a VSX unavailable exception happens in the middle of a transaction.
+If a transaction is initiated with MSR.FP=1, MSR.VEC=0, and MSR.VSX=0 and
+a VSX instruction is executed in the middle of a transaction the FP state is
+reclaimed properly from the checkpoint area and VR state as well. However
+due to the current recheckpoint logic (which just recheckpoints the opposite
+reclaimed state) FP state is not recheckpoint and when the transaction
+rollback it contains an invalid FP state. The same problem happens when
+MSR.FP=0, MSR.VEC=1, and MSR.VSX=0, but now VR are reclaimed correctly from
+the checkpoint area but are not recheckpointed correctly back and so after
+the rollback one see an invalid VR state. It's also worth to meantion that
+currently that problem does not exist if the VSX unavailable exception is
+caught in transaction if MSR.FP=0, MSR.VEC=0, and MSR=VSX=0 because both
+states (FP and VR) will be copied from live state which are the exact same
+state as the state before entering in transactional mode and will be then
+be recheckpoint both (due to the recheckpoint opposite logic). Finally it's
+also quite hard to see such a sort of corruption if MSR.FP=1, MSR.VEC=1, ie
+if load_up_fpu() and load_up_altivec() were called before entering in TM
+due to the execution of a FP and a vector instruction because in that case
+the restore_math() function will be called when a Decrementer trap occurs
+(0x900) and it will immediatly set too MSR.VSX=1, thus making extremely
+hard (if not impossible in practice) to caught a VSX unavailable exception
+in transaction when MSR.FP=1 and MSR.VEC=1.
+
+This commit fixes the two aforementioned corner cases by forcing, after the
+reclaim process, the recheckpoint of both FP and VR state to the checkpoint
+area since after tm_reclaim() is performed the thread structures employed
+to keep the FP and VR states to be recheckpointed (ckfp_state and ckvr_state)
+are already set properly to a state equal to the state as before entering
+the transaction.
+
+Signed-off-by: Breno Leitao <leitao@debian.org>
+---
+ arch/powerpc/kernel/traps.c | 26 ++++++++++++++++++++++----
+ 1 file changed, 22 insertions(+), 4 deletions(-)
+
+diff --git a/arch/powerpc/kernel/traps.c b/arch/powerpc/kernel/traps.c
+index e6cc56b..14cf3fc 100644
+--- a/arch/powerpc/kernel/traps.c
++++ b/arch/powerpc/kernel/traps.c
+@@ -1624,16 +1624,34 @@ void vsx_unavailable_tm(struct pt_regs *regs)
+ 		return;
+ 	}
+ 
+-	/* This reclaims FP and/or VR regs if they're already enabled */
++	/* This reclaims both FP and VR registers. But if FP is enabled
++	 * it means that the FP live state when the exception happened
++	 * (saved to fp_state) could be different from the checkpointed
++	 * FP state since a FP instruction (allowed in transaction) could
++	 * have changed any FP register. Hence if that is the case
++	 * tm_reclaim_current() copies the FP state from the checkpoint
++	 * area (after reclaiming it) to the ckfp_state struct. If FP is
++	 * disabled it means the FP live state when the exception happened
++	 * was the same as the checkpointed FP state as no FP instruction was
++	 * allowed in transactional and so tm_reclaim_current() just copies
++	 * fp_state to ckfp_state. The same applies to VEC: if VEC is enabled
++	 * the VR state in checkpoint area is used to set ckvr_state; if VEC
++	 * is disabled the VR state from vr_state is used to set ckvr_state.
++	 * Final result is a checkpoint struct (ckfp_state and ckvr_state)
++	 * ready to be copied to the checkpoint area (recheckpointed) with
++	 * the correct states (FP and VEC) for the transaction rollback.
++	 */
+ 	tm_reclaim_current(TM_CAUSE_FAC_UNAV);
+ 
+ 	regs->msr |= MSR_VEC | MSR_FP | current->thread.fpexc_mode |
+ 		MSR_VSX;
+ 
+-	/* This loads & recheckpoints FP and VRs; but we have
+-	 * to be sure not to overwrite previously-valid state.
++	/* This recheckpoints both FP and VR registers. It loads both
++	 * the FP state and the VR state from the checkpoint struct and
++	 * recheckpoints them as ckfp_state and ckvr_state are already
++	 * set correctly after a call to tm_reclaim_current().
+ 	 */
+-	tm_recheckpoint(&current->thread, regs->msr & ~orig_msr);
++	tm_recheckpoint(&current->thread, regs->msr | MSR_FP | MSR_VEC);
+ 
+ 	msr_check_and_set(orig_msr & (MSR_FP | MSR_VEC));
+ 
+-- 
+2.7.4
+

@@ -1,0 +1,71 @@
+From f1901e01b8ad6ae75cc47ddd56201b0b9680e70e Mon Sep 17 00:00:00 2001
+From: Gustavo Romero <gromero@linux.vnet.ibm.com>
+Date: Fri, 16 Jun 2017 17:58:43 -0400
+Subject: [PATCH 1/2] powerpc/tm: call giveup_all() before tm_reclaim()
+
+The moving up of giveup_all() in this commit amounts to set correctly
+fp_state, vr_state (used to keep the live speculated state values of
+f0-31/vs0-31 and v0-31/vs32-63, respectively), and ckpt_regs.msr before
+treclaiming, when the ckfp_state content and the ckvr_state content
+are set from the fp_state/vr_state or from the checkpoint area using
+the correct msr value taken from regs->msr.
+
+For instance, if we take an fp_unavailable whilst in a transaction
+and at the same time MSR.VEC=1 we'll end up in fp_unavailable_tm()
+and tm_reclaim_thread() will be called to reclaim the checkpointed
+state in the checkpoint area. Now once in tm_reclaim_thread() if we
+don't do the giveup_all() before the tm_reclaim() then the speculated
+live state values are lost. Futhermore, ckpt_regs.msr wont'be set
+correctly and tm_reclaim() won't get told about MSR.VEC=1 and so it
+wont't backup into ckvr_state the checkpointed vector (VMX) registers,
+i.e. the vector register values before entering in transactional mode.
+
+The same would happen for the fp registers if MSR.FP=1 were set instead.
+
+Signed-off-by: Breno Leitao <leitao@debian.org>
+Signed-off-by: Cyril Bur <cyrilbur@gmail.com>
+---
+ arch/powerpc/kernel/process.c | 25 +++++++++++++++++++++++++
+ 1 file changed, 25 insertions(+)
+
+diff --git a/arch/powerpc/kernel/process.c b/arch/powerpc/kernel/process.c
+index 5dd056d..5b77134 100644
+--- a/arch/powerpc/kernel/process.c
++++ b/arch/powerpc/kernel/process.c
+@@ -839,8 +839,33 @@ static void tm_reclaim_thread(struct thread_struct *thr,
+ 	if (!MSR_TM_SUSPENDED(mfmsr()))
+ 		return;
+ 
++	/* Save all register sets under use in userspace (FP/VEC/VSX)
++         * into its proper thread struct and copy regs.msr to ckpt_regs.msr
++         * so it's correct when used below, reflecting the correct state of
++         * the msr register in userspace just before entering in kernel
++         * space.
++         */
+ 	giveup_all(container_of(thr, struct task_struct, thread));
+ 
++	/*
++	 * If we are in a transaction and FP is off then we can't have
++	 * used FP inside that transaction. Hence the checkpointed
++	 * state is the same as the live state. We need to copy the
++	 * live state to the checkpointed state so that when the
++	 * transaction is restored, the checkpointed state is correct
++	 * and the aborted transaction sees the correct state. We use
++	 * ckpt_regs.msr here as that's what tm_reclaim will use to
++	 * determine if it's going to write the checkpointed state or
++	 * not. So either this will write the checkpointed registers,
++	 * or reclaim will. Similarly for VMX.
++	 */
++	if ((thr->ckpt_regs.msr & MSR_FP) == 0)
++		memcpy(&thr->ckfp_state, &thr->fp_state,
++		       sizeof(struct thread_fp_state));
++	if ((thr->ckpt_regs.msr & MSR_VEC) == 0)
++		memcpy(&thr->ckvr_state, &thr->vr_state,
++		       sizeof(struct thread_vr_state));
++
+ 	tm_reclaim(thr, thr->ckpt_regs.msr, cause);
+ }
+ 
+-- 
+2.7.4
+
