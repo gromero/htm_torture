@@ -80,8 +80,12 @@ asm(
    );
 
 texasr = __builtin_get_texasr();
-if (_TEXASR_FAILURE_CODE(texasr) == 0xe0) // If TM_CAUSE_KVM_RESCHED ignore and retry transaction
+
+if (_TEXASR_FAILURE_CODE(texasr) == 0xe0) {  // If TM_CAUSE_KVM_RESCHED ignore and retry transaction
+  printf(".\n");
   goto _do_htm;
+}
+
 else { // otherwise it was a TM_CAUSE_RESCHED (ie aborted due to a context switch, so exit generating a core file)
   printf("\nTEXASR: %"PRIx64" \n", texasr);
   printf(": Failure with error: %lx\n\n",  _TEXASR_FAILURE_CODE(texasr));
