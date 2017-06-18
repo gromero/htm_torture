@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include<htmintrin.h>
 #include <inttypes.h>
 #include <pthread.h>
 #include <sched.h>
@@ -11,6 +12,7 @@ void *ping(void *not_used)
 
 uint64_t high; // aux register to keep high 64bit (MSB) of a 128bit VSX register
 uint64_t low;  // aux register to keep low 64bit (LSB) of a 128bit VSX register
+uint64_t z;    // texasr
 
 sleep(1); // wait thread to be renamed to "ping". it's not necessary to reproduce the issue, but it's easier to install a selective stap probe using execname() == "ping".
 
@@ -66,14 +68,26 @@ asm("fadd    10, 10, 10;"); // set MSR.FP = 1 before provoking a VSX unavailable
 // If MSR.FP  = 1 => VSX0/FP0 is corrupted,
 // If MSR.VEC=MSR.FP=1 => both VSX32/VMX0 and VSX0/FP are corrupted.
 
+_do_htm:
 asm(
    "1: tbegin.             ;" // begin HTM
    "   beq       3f        ;" // failure handler, taken after the VSX unavailable exception
-   "l: b l;"                         // don't do anything in HTM, just loop over and over until a context switch aborts it and we take the path to the failure handler
    "   tend.               ;" // end HTM
    "2: b 1b                ;" // failure handler just exits dumping all registers
-   "3: .long 0x0           ;" // on failure exit generating a core file
+   "3: nop           ;" // on failure exit generating a core file
    );
+
+
+z = __builtin_get_texasr();
+if (_TEXASR_FAILURE_CODE(z) == 0xe0 /* if KVM_RESCHED ignore and retry */)
+  goto _do_htm;
+
+printf("\n\n==============\n\n");
+printf("\nTEXASR: %"PRIx64" \n", z);
+printf(": Failure with error: %lx\n\n",  _TEXASR_FAILURE_CODE(z));
+printf(": Summary error: %lx\n",  _TEXASR_FAILURE_SUMMARY(z));
+asm(".long 0x0;");
+
 }
 
 void *pong(void *not_used)
