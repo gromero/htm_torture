@@ -1,0 +1,48 @@
+From 9dae86c7c70bbef653e17132dabdf757da680138 Mon Sep 17 00:00:00 2001
+From: Gustavo Romero <gromero@linux.vnet.ibm.com>
+Date: Sun, 18 Jun 2017 15:26:29 -0400
+Subject: [PATCH] powerpc/tm: fix FP/VR corruption on context switch
+
+Currently there is a very hard to reproduce issue when a context switch is
+performed in the middle of a transaction that leads to register corruption.
+If MSR.FP=0 when the context switch happens the FP registers are not
+recheckpointed correctly back to the checkpoint area and hence will get
+corrupted after the rollback. If MSR.VEC=0 then the corruption in question
+affects just the VR registers. Likewise, if MSR.FP=0 and MSR.VEC=0 both FP
+and VR registers get corrupted. These conditions are hard to be reproduced
+because (a) it's unlikely that a context switch happens in the middle of a
+transaction and because (b) if one arrange to perform an HTM in a loop it
+also increases the chance of restore_math() be trigged by, for instance, a
+Decrementer interrupt (0x900), in the middle of a transaction.
+If restore_math() is called in the middle of a transaction then regardless
+if MSR.FP=0 or MSR.VEC=0 or both restore_fp() and/or restore_altivec() will
+set MSR.FP=1 and MSR.VEC=1 so when the next context switch occurs in the
+middle of a transaction we have both FP and VEC enabled and hence the
+condition to cause the recheckpoint failure on a context switch (MSR.FP=0
+and/or MSR.VEC=0) is not satisfied.
+
+This commit fixes that issue by forcing the recheckpoint of both FP and VR
+states present in the thread structures (ckfp_state and ckvr_state) that
+are already set correctly after tm_reclaim_thread() was performed.
+
+Signed-off-by: Breno Leitao <leitao@debian.org>
+---
+ arch/powerpc/kernel/process.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/powerpc/kernel/process.c b/arch/powerpc/kernel/process.c
+index 5b77134..31f3b5e 100644
+--- a/arch/powerpc/kernel/process.c
++++ b/arch/powerpc/kernel/process.c
+@@ -971,7 +971,7 @@ static inline void tm_recheckpoint_new_task(struct task_struct *new)
+ 		 "(new->msr 0x%lx, new->origmsr 0x%lx)\n",
+ 		 new->pid, new->thread.regs->msr, msr);
+ 
+-	tm_recheckpoint(&new->thread, msr);
++	tm_recheckpoint(&new->thread, msr | MSR_FP | MSR_VEC);
+ 
+ 	/*
+ 	 * The checkpointed state has been restored but the live state has
+-- 
+2.7.4
+
