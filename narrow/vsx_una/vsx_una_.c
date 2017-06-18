@@ -9,8 +9,8 @@
 void *ping(void *not_used)
 {
 
-uint64_t high; // aux register to keep high 64bit (MSB) of a 128bit VSX register
-uint64_t low;  // aux register to keep low 64bit (LSB) of a 128bit VSX register
+uint64_t high; // tmp register to keep high 64bit (MSB) of a 128bit VSX register
+uint64_t low;  // tmp register to keep low 64bit (LSB) of a 128bit VSX register
 
 asm (
    // r3 = 0x5555555555555555
@@ -63,7 +63,8 @@ for(i=0; i<1024*1024*512; i++);
 
 // If MSR.VEC = 1 => VSX32/VMX0 is corrupted,
 // If MSR.FP  = 1 => VSX0/FP0 is corrupted,
-// If MSR.VEC=MSR.FP=1 => both VSX32/VMX0 and VSX0/FP are corrupted.
+// If MSR.VEC=MSR.FP=1 => restore_math() called from trap 0x900 (Decrementer) will set also MSR.VSX=1 so
+// the VSX unavailable exception in TM never happens and HTM commits the change (xxmrghd) without failing.
 
 asm(
    "1: tbegin.             ;" // begin HTM
