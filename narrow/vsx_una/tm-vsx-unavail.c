@@ -23,6 +23,12 @@ void *ping(void *input)
 
 	struct Flags *f = (struct Flags *) input;
 
+	/* Wait a bit so thread can get its name "ping".
+	 * This is not important to reproduce the issue but
+	 * it's nice to have for systemtap observance ;-)
+	 */
+	sleep(1);
+
 	asm (
 		// high = 0x5555555555555555
 		"lis  %[high], 0x5555         ;"
@@ -73,7 +79,7 @@ void *ping(void *input)
 		// set MSR.VEC = 1 before provoking a VSX unavailable in TM
 		asm("vaddcuw 10, 10, 10;");
 
-
+	// TODO: remove that comment when porting to kernel test harness
 	// If MSR.VEC = 1 => VSX32/VMX0 is corrupted,
 	// If MSR.FP  = 1 => VSX0/FP0 is corrupted,
 	// If MSR.VEC=MSR.FP=1 => restore_math() called from trap 0x900 (Decrementer) will set also MSR.VSX=1 so
@@ -120,7 +126,8 @@ void *ping(void *input)
 
 void *pong(void *not_used)
 {
-	while(1) sched_yield();
+	sleep(1); // wait thread get its name "pong"
+	while(1) sched_yield(); // classed as a interactive-like thread
 }
 
 int main(int argc, char **argv)
