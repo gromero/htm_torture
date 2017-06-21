@@ -181,7 +181,7 @@ int main(int argc, char **argv)
 		printf("result: failed!\n");
 		exit(1);
 	} else {
-		printf("result: sucess\n");
+		printf("result: success\n");
 		exit(0);
 	}
 }
