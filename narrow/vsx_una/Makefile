@@ -1,6 +1,6 @@
 CFLAGS=-O0 -g -pthread
 all:	tm-vsx-unavail.o
-	gcc $(CFLAGS) tm-vsx-unavail.o -o tm-vsx_unavail
+	gcc $(CFLAGS) tm-vsx-unavail.o -o tm-vsx-unavail
 
 clean:
 	rm -fr *.o
