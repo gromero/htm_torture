@@ -80,7 +80,7 @@ void* ping(void *not_used) {
 		"b     %[value_ok]            ;"
 		:
 		:
-		:
+		: "r3", "r4", "vs33", "vs34", "vs0", "vs10", "fr10", "r7", "r5", "r6", "vs3"
 		: value_mismatch, value_ok
 		);
 value_mismatch:
