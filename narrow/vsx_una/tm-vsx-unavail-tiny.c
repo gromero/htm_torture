@@ -73,9 +73,9 @@ void* ping(void *not_used) {
 		// N.B. r3 and r4 never changed since they were used to
 		// construct the initial vs0 value, hence we can use them to do the
 		// comparison. r3 and r4 will be destroy but it's not important.
-		"andi. 3, 3, 5                ;" // compare r3 to r5
+		"and. 3, 3, 5                 ;" // compare r3 to r5
 		"bne   %[value_mismatch]      ;"
-		"andi. 4, 4, 6                ;" // compare r4 to r6
+		"and. 4, 4, 6                 ;" // compare r4 to r6
 		"bne   %[value_mismatch]      ;"
 		"b     %[value_ok]            ;"
 		:
@@ -85,8 +85,10 @@ void* ping(void *not_used) {
 		);
 value_mismatch:
 		passed = 0;
+		return NULL;
 value_ok:
 		passed = 1;
+		return NULL;
 }
 
 void *pong(void *not_used)
