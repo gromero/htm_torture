@@ -1,4 +1,8 @@
 CFLAGS=-O0 -g -pthread
+
+%.o:	%.c
+	gcc $(CFLAGS) -c $< -o $@
+
 all:	tm-vsx-unavail.o tm-vsx-unavail-tiny.o
 	gcc $(CFLAGS) tm-vsx-unavail.o -o tm-vsx-unavail
 	gcc $(CFLAGS) tm-vsx-unavail-tiny.o -o tm-vsx-unavail-tiny
