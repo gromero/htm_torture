@@ -1,22 +1,21 @@
-From 4aacad2e7dfed942fe02a735a9a061a0ac107f82 Mon Sep 17 00:00:00 2001
-From: Gustavo Romero <gusbromero@gmail.com>
-Date: Sun, 28 May 2017 16:23:17 -0400
-Subject: [PATCH] Print vsx32 (128bit register)
-
-
 diff --git a/runtime/linux/regs.c b/runtime/linux/regs.c
-index 6573967..87c6494 100644
+index 6573967..654ee1a 100644
 --- a/runtime/linux/regs.c
 +++ b/runtime/linux/regs.c
-@@ -163,7 +163,52 @@ static void _stp_print_regs(struct pt_regs * regs)
+@@ -163,7 +163,65 @@ static void _stp_print_regs(struct pt_regs * regs)
  static void _stp_print_regs(struct pt_regs * regs)
  {
  	int i;
 -
 +        uint64_t msr;
 +        uint64_t msr_saved;
-+        uint64_t high_chunk=1; // GPRx
-+        uint64_t low_chunk=2;  // GPRy
++        uint64_t high_chunk; // GPRx
++        uint64_t low_chunk;  // GPRy
++
++        uint64_t vsx0_high_chunk; // GPRx
++        uint64_t vsx0_low_chunk;  // GPRy
++
++
 +
 +__asm__(
 +       "mfmsr %[msr];"
@@ -28,7 +27,7 @@ index 6573967..87c6494 100644
 +       msr_saved = msr;
 +       msr = msr + 0x2802000; // set MSR_FP + MSR_VEC | MSR_VSX to avoid interruptions
 +
-+__asm__(
++__asm__ __volatile__ (
 +       "mtmsr %[msr];"
 +       "isync       ;" // take effect
 +       :
@@ -37,17 +36,24 @@ index 6573967..87c6494 100644
 +       );
 +
 +__asm__(
++
++     "mfvsrd %[vsx0_high_chunk], 0;"
++     "xxsldwi 3, 0, 0, 2;"
++     "mfvsrd %[vsx0_low_chunk], 3;"
++
 +     "mfvsrd %[high_chunk], 32;"
 +     "xxsldwi 3, 32, 32, 2;"
 +     "mfvsrd %[low_chunk], 3  ;"
 +
 +     :    [high_chunk] "=r"(high_chunk),
-+          [low_chunk]  "=r"(low_chunk)
++          [low_chunk]  "=r"(low_chunk),
++          [vsx0_high_chunk] "=r"(vsx0_high_chunk),
++          [vsx0_low_chunk]  "=r"(vsx0_low_chunk)
 +     :
-+     :
++     : "vs3", "vs0", "vs32"
 +     );
 +
-+__asm__(
++__asm__ __volatile__ (
 +        "mtmsr %[msr_saved];"
 +        "isync;             "
 +        :
@@ -56,13 +62,14 @@ index 6573967..87c6494 100644
 +      );
 +
 +
-+        _stp_printf("vsx0: 0x%016lx%016lx\n", high_chunk, low_chunk);
++        _stp_printf("vsx0=0x%016lx%016lx ", vsx0_high_chunk, vsx0_low_chunk);
++        _stp_printf("vsx32=0x%016lx%016lx ", high_chunk, low_chunk);
 +//      _stp_printf("LOW_CHUNK:   %.16lx\n", low_chunk);
 +/*
  	_stp_printf("NIP: %016lX XER: %08X LR: %016lX CTR: %016lX\n",
  	       regs->nip, (unsigned int)regs->xer, regs->link, regs->ctr);
  	_stp_printf("REGS: %016lx TRAP: %04lx\n", (long)regs, regs->trap);
-@@ -171,11 +216,11 @@ static void _stp_print_regs(struct pt_regs * regs)
+@@ -171,11 +229,11 @@ static void _stp_print_regs(struct pt_regs * regs)
  			regs->msr, (unsigned int)regs->ccr);
  	_stp_printf("DAR: %016lx DSISR: %016lx\n",
  		       	regs->dar, regs->dsisr);
@@ -77,7 +84,7 @@ index 6573967..87c6494 100644
  	for (i = 0; i < 32; i++) {
  		if ((i % 4) == 0) {
  			_stp_printf("\n GPR%02d: ", i);
-@@ -187,6 +232,7 @@ static void _stp_print_regs(struct pt_regs * regs)
+@@ -187,6 +245,7 @@ static void _stp_print_regs(struct pt_regs * regs)
  	}
  	_stp_printf("\nNIP [%016lx] ", regs->nip);
  	_stp_printf("LR [%016lx]\n", regs->link);
@@ -85,6 +92,3 @@ index 6573967..87c6494 100644
  }
  
  #elif defined (__aarch64__)
--- 
-2.7.4
-
