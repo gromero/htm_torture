@@ -9,7 +9,7 @@
 int passed;
 
 void* ping(void *not_used) {
-
+	sleep(1);
 	asm goto (
 		// r3 = 0x5555555555555555
 		"lis  3, 0x5555    ;"
@@ -33,20 +33,21 @@ void* ping(void *not_used) {
 		// vs0 = (r3 || r4) = 0x5555555555555555FFFFFFFFFFFFFFFF
 		"xxmrghd 0, 33, 34 ;"
 
-		// Any floating-point instruction in here.
-	        // N.B. 'fmr' is *not touching* any previously set register,
-		// i.e. it's not touching vs0.
-		"fmr    10, 10     ;"
-
 		// Wait about 10s so we have a sufficient amount of context
 		// switches so load_fp and load_vec overflow and MSR.FP, MSR.VEC,
 		// and MSR.VSX are disabled.
 		"       lis	 7, 0x1       ;"
 		"       ori      7, 7, 0xBFFE ;"
-		"       sldi     7, 7, 17     ;"
+		"       sldi     7, 7, 15     ;"
 		"1:	addi     7, 7, -1     ;"
 	        "       cmpdi    7, 0         ;"
 	        "       bne      1b           ;"
+
+		// Any floating-point instruction in here so we enter in TM
+		// when MSR.FP=1. MSR.VEC and MSR.VSX are disabled.
+	        // N.B. 'fmr' is *not touching* any previously set register,
+		// i.e. it's not touching vs0 (previously set).
+		"fmr    10, 10     ;"
 
 		// vs0 is *still* 0x5555555555555555FFFFFFFFFFFFFFFF, right?
 		// So let's get in a transaction and cause a VSX unavailable exception.
@@ -55,6 +56,7 @@ void* ping(void *not_used) {
 		"       xxmrghd  10, 10, 10   ;" // VSX unavailable in TM. Any VSX instr
 		"       tend.                 ;" // End HTM
 		"3:     nop                   ;" // Fall through to code below to check vs0
+//		"       .long 0x0             ;" // Uncomment to generate a core dump
 
 		// Immediately after a transaction failure we save vs0 to two
 		// general purpose registers to check its value. We need to have the
@@ -73,9 +75,9 @@ void* ping(void *not_used) {
 		// N.B. r3 and r4 never changed since they were used to
 		// construct the initial vs0 value, hence we can use them to do the
 		// comparison. r3 and r4 will be destroy but it's not important.
-		"and. 3, 3, 5                 ;" // compare r3 to r5
+		"cmpd 3, 5                 ;" // compare r3 to r5
 		"bne   %[value_mismatch]      ;"
-		"and. 4, 4, 6                 ;" // compare r4 to r6
+		"cmpd 4, 6                 ;" // compare r4 to r6
 		"bne   %[value_mismatch]      ;"
 		"b     %[value_ok]            ;"
 		:
@@ -118,6 +120,7 @@ int main(int argc, char **argv)
 	printf("Checking if FP/VSX register is sane after a VSX unavailable exception in TM...\n");
 
 	pthread_create(&t0, &attr /* bound to cpu 0 as well */, ping, NULL);
+	pthread_setname_np(t0, "ping"); // name it for systemtap convenience
 	pthread_join(t0, NULL);
 
 	if (passed) { printf("result: passed\n"); exit(0); }
