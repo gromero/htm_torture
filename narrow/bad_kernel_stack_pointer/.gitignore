@@ -1,0 +1,2 @@
+*.o
+bad_kernel_stack_pointer
