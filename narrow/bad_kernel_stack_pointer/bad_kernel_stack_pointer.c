@@ -48,26 +48,9 @@ void advanced_signal_handler(int signo, siginfo_t *si, void *data)
  printf("* Received a SIGTRAP\n");
 }
 
-/***********/
-/* WORKER  */
-/***********/
-
-void* worker_with_htm_and_trap(void *sig)
-{
- while (1 == 1)
- {
-  asm (
-       "   tbegin. \n\t"
-       "   beq 2f  \n\t"
-       "   trap    \n\t" // <==== REMOVE ME TO AVOID CRASH
-       "   tend.   \n\t"
-       "2:         \n\t"
-       :
-       :
-       :
-      );
- }
-}
+/********/
+/* MAIN */
+/********/
 
 int main(void)
 {
@@ -87,10 +70,19 @@ int main(void)
 
  pthread_sigmask(SIG_UNBLOCK, &sigset, NULL);
 
- // Execute worker
- pthread_create(&t1, NULL, worker_with_htm_and_trap, (void*) &sigset);
+ while(1) {
+ asm (
+      "   tbegin. \n\t"
+      "   beq 2f  \n\t"
+      "   trap    \n\t" // <==== REMOVE ME TO AVOID CRASH
+      "   tend.   \n\t"
+      "2:         \n\t"
+      :
+      :
+      :
+     );
+ }
 
- pthread_join(t1, NULL);
-
+ // will never reach here
  exit(0);
 }
