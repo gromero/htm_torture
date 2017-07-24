@@ -8,7 +8,7 @@ global command="vsx_una_";
 
 function pp(function_name: string)
 {
- if (execname() == command) {
+// if (execname() == command) {
 
   load_fp  = task_current()->thread->load_fp
   load_vec = task_current()->thread->load_vec
@@ -70,8 +70,9 @@ function pp(function_name: string)
   // Print vsx32 (vmx0). It must be the last printing since it contains the \n.
   // The hackish systemtap patch to print 128bit registers must be applied to use
   // print_regs() here.
-  print_regs()
- }
+  // print_regs()
+  printf("\n")
+// }
 }
 
 function pp_(function_name: string)
@@ -123,26 +124,34 @@ function pp_(function_name: string)
   printf("ckvr_state.vr[0]=0x%.16x%.16x ", ckvr_state_vr0_HIGH, ckvr_state_vr0_LOW)
 
   // Print vsx32 (vmx0). It must be the last printing since it contains the \n.
-  print_regs()
+  // print_regs()
+  //print_backtrace();
+  printf("\n");
 }
 
 /*************
  ** PROBES ***
  *************/
 
-probe kernel.function("__switch_to").call                 { pp("__switch_to.call                ") }
-probe kernel.function("__switch_to").return               { pp("__switch_to.return              ") }
+//probe kernel.function("__switch_to").call                 { pp("__switch_to.call                ") }
+//probe kernel.function("__switch_to").return               { pp("__switch_to.return              ") }
+probe kernel.function("restore_tm_sigcontexts").inline    { pp("restore_tm_sigcontexts.inline   ") }
+probe kernel.function("setup_tm_sigcontexts").inline      { pp("setup_tm_sigcontexts.inline     ") }
 probe kernel.function("tm_reclaim").call                  { pp("tm_reclaim.call                 ") }
 probe kernel.function("tm_reclaim").return                { pp("tm_reclaim.return               ") }
 //probe kernel.function("tm_reclaim_task").inline           { pp("tm_reclaim_task.inline          ") }
 probe kernel.function("tm_reclaim_thread").call           { pp("tm_reclaim_thread.call          ") }
 probe kernel.function("tm_reclaim_thread").return         { pp("tm_reclaim_thread.return        ") }
+probe kernel.function("tm_reclaim_current").call          { pp("tm_reclaim_current.call         ") }
+probe kernel.function("tm_reclaim_current").return        { pp("tm_reclaim_current.return       ") }
 // probe kernel.function("tm_recheckpoint_new_task").inline  { pp("tm_recheckpoint_new_task.inline ") }
 probe kernel.function("tm_recheckpoint").call             { pp_("tm_recheckpoint.call            ") }
 probe kernel.function("tm_recheckpoint").return           { pp_("tm_recheckpoint.return          ") }
 
-probe kernel.function("load_up_fpu").call                 { pp("load_up_fpu.call                ") }
-probe kernel.function("load_up_fpu").return               { pp("load_up_fpu.return              ") }
+probe kernel.function("sys_rt_sigreturn").call	          { pp("sys_rt_sigreturn.call           ") }
+
+//probe kernel.function("load_up_fpu").call                 { pp("load_up_fpu.call                ") }
+//probe kernel.function("load_up_fpu").return               { pp("load_up_fpu.return              ") }
 probe kernel.function("fp_unavailable_tm").call           { pp("fp_unavailable_tm.call          ") }
 probe kernel.function("fp_unavailable_tm").return         { pp("fp_unavailable_tm.return        ") }
 
@@ -151,10 +160,10 @@ probe kernel.function("load_up_altivec").return           { pp("load_up_altivec.
 probe kernel.function("altivec_unavailable_tm").call      { pp("altivec_unavailable_tm.call     ") }
 probe kernel.function("altivec_unavailable_tm").return    { pp("altivec_unavailable_tm.return   ") }
 
-probe kernel.function("load_up_vsx").call                 { pp("load_up_vsx.call                ") }
-probe kernel.function("load_up_vsx").return               { pp("load_up_vsx.return              ") }
+//probe kernel.function("load_up_vsx").call                 { pp("load_up_vsx.call                ") }
+//probe kernel.function("load_up_vsx").return               { pp("load_up_vsx.return              ") }
 probe kernel.function("vsx_unavailable_tm").call          { pp("vsx_unavailable_tm.call         ") }
 probe kernel.function("vsx_unavailable_tm").return        { pp("vsx_unavailable_tm.return       ") }
-probe kernel.function("restore_math").call                { pp("restore_math.call               ") }
-probe kernel.function("restore_math").return              { pp("restore_math.return             ") }
+// probe kernel.function("restore_math").call                { pp("restore_math.call               ") }
+// probe kernel.function("restore_math").return              { pp("restore_math.return             ") }
 //probe kernel.statement(0xc000000000051258).absolute       { pp("tm_reclaim.just_after_reclaim   ") }
