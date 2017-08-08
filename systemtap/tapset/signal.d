@@ -55,7 +55,7 @@ function pp(function_name: string)
 
   printf("ckpt_regs->r1: 0x%.16lx ", ckpt_regs_gpr1)
 
-  printf("load_fp=0x%.2x load_vec=0x%.2x load_tm=0x%.2x used_vr=%d used_vsr=%d  tm_texasr=0x%.16lx ", load_fp, load_vec, load_tm, used_vr, used_vsr, tm_texasr)
+  printf("load_fp=0x%.2x load_vec=0x%.2x load_tm=0x%.2x used_vr=%d used_vsr=%d tm_texasr=0x%.16lx ", load_fp, load_vec, load_tm, used_vr, used_vsr, tm_texasr)
 
   printf("msr[ FP=%d VEC=%d VSX=%d TS=%d TM=%d ]   ", msr & 1 << 13 ? 1 : 0, // MSR_FP
                                                       msr & 1 << 25 ? 1 : 0, // MSR_VEC
@@ -216,7 +216,7 @@ function pp__(function_name: string, prev_task: long, new_task: long)
 
   printf("ckpt_regs->r1: 0x%.16lx ", p_ckpt_regs_gpr1)
 
-  printf("load_fp=0x%.2x load_vec=0x%.2x load_tm=0x%.2x used_vr=%d used_vsr=%d  tm_texasr=0x%.16lx ", p_load_fp, p_load_vec, p_load_tm, p_used_vr, p_used_vsr, p_tm_texasr)
+  printf("load_fp=0x%.2x load_vec=0x%.2x load_tm=0x%.2x used_vr=%d used_vsr=%d tm_texasr=0x%.16lx ", p_load_fp, p_load_vec, p_load_tm, p_used_vr, p_used_vsr, p_tm_texasr)
 
   printf("regs->msr [ FP=%d VEC=%d VSX=%d TS=%d TM=%d ] ", p_regs_msr & 1 << 13 ? 1 : 0, // MSR_FP
                                                            p_regs_msr & 1 << 25 ? 1 : 0, // MSR_VEC
