@@ -3,3 +3,5 @@ a.out
 torture
 qs
 core*
+systemtap/*.log
+systemtap/*/*.log
