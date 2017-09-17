@@ -490,7 +490,9 @@ _value_mismatch:
 	printf("\n\n==============\n\n");
 	printf("\nFailure with error: %lx\n\n",  _TEXASR_FAILURE_CODE(z));
 	printf(": Summary error: %lx\n",  _TEXASR_FAILURE_SUMMARY(z));
-	printf(": TFIAR error: %lx\n\n", _TEXASR_TFIAR_EXACT(z));
+	printf(": TFIAR error: %lx\n", _TEXASR_TFIAR_EXACT(z));
+	printf(": TEXASR: %.16lx\n", z);
+	printf(": Workload: %ld\n\n", workload);
 
        _ (".long 0"); // exit with a core dump
         // TODO: move 'nr' and 'res' to input list in inline asm above and remove from here.
