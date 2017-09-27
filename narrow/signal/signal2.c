@@ -90,41 +90,26 @@ _do_htm:
 	    "sldi 10, 10, 32               ;"
 	    "oris 10, 10, 0xFFFF           ;"
 	    "ori  10, 10, 0xFFFF           ;"
-	    // N.B. r3 and r4 never changed since they were used to
-	    // construct the initial vs0 value, hence we can use them to do the
-	    // comparison. r3 and r4 will be destroy but it's not important.
-	    "cmpd  9, 5             	;"	// compare r9 (expected value) to r5
-	    "bne   %[value_mismatch]	;" "cmpd  10, 6            	;"	// compare r10 (expected value) to r6
-"bne   %[value_mismatch]	;" "b     %[value_ok]      	;":
-:
-: "r3", "r4", "vs33", "vs34", "vs0", "vs10", "fr10", "r7", "r5", "r6", "vs3", "r9", "r10":value_mismatch,
+	    "cmpd  9, 5             	;"
+	    "bne   %[value_mismatch]	;"
+	    "cmpd  10, 6            	;"
+	    "bne   %[value_mismatch]	;"
+	    "b     %[value_ok]      	;":
+            :
+            : "r3", "r4", "vs33", "vs34", "vs0", "vs10", "fr10", "r7", "r5", "r6", "vs3", "r9", "r10":value_mismatch,
 	    value_ok);
+
 value_mismatch:
   printf ("value_mismatch()\n");
-  asm (".long 0x0;");
+ // asm (".long 0x0;");
+  exit(-22);
   pthread_kill (pong_tid, SIGKILL);
   return NULL;
+
 value_ok:
   printf ("value_ok()\n");
-//              asm(".long 0x0;");
   goto _do_htm;
-//              pthread_kill(pong_tid, SIGILL);
   return NULL;
-
-/*
-texasr = __builtin_get_texasr();
-
-if (_TEXASR_FAILURE_CODE(texasr) == 0xe0) {  // If TM_CAUSE_KVM_RESCHED ignore and retry transaction
-  printf(".\n");
-  goto _do_htm;
-}
-
-else { // otherwise it was a TM_CAUSE_RESCHED (ie aborted due to a context switch, so exit generating a core file)
-  printf("\nTEXASR: %"PRIx64" \n", texasr);
-  printf(": Failure with error: %lx\n\n",  _TEXASR_FAILURE_CODE(texasr));
-  asm(".long 0x0;"); // exit dumping all registers state
-}
-*/
 }
 
 
@@ -132,7 +117,7 @@ void *
 pong (void *not_used)
 {
   pong_tid = pthread_self ();
-  sleep (1);			// wait pthread to be renamed to "pong". it's not necessary to reproduce the issue, but it's easier to install a selective probe using execname() == "pong".
+  sleep (1);			
   while (1)
     {
       sched_yield ();
