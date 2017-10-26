@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
 
         /**** WORKLOADS ****/
 
-        init_workers();
+        //init_workers();
 
         nr_threads = 450;
 
@@ -101,20 +101,14 @@ int main(int argc, char **argv) {
 
         start_workers(8, nr_threads); // Illegal instruction
         start_workers(9, nr_threads); // trap
+        start_workers(10, nr_threads); // dscr
 
 
         join_workers();
 
         /*******************/
 
-        } // while (1)
-/*
-        // Print ordered array
-        for (int i = 0; i < ARRAY_SIZE; i++) printf("%ld\n", array[i]);
-*/
-
-//	for (int i = 0; i < REPEAT; i++)
-//		start_threads(threads);
+        } 
 
 	return 0;
 }
