@@ -1,14 +1,24 @@
 #include "torture.h"
+#define DEBUG 1 
 
 void register_workload(void *func, char *description) {
 	int i = 0;
-	while (workloads[i] != NULL)
-		i++;
-	workloads[i] = func;
+	workloads[nr_workloads] = func;
+	strncpy(&wname[nr_workloads][0], description, 1024);
+
 	#ifdef DEBUG
 	printf("Registering workload %d (%s)\n", nr_workloads, description ? description : "no description available");
 	#endif
+
 	nr_workloads++;
+}
+
+void list_workloads(){
+	int i;
+
+	for (i = 0 ; i < nr_workloads ; i++){
+		printf("%d:	: %s\n", i, &wname[i]);
+	}
 }
 
 void set_workloads() {
@@ -56,6 +66,8 @@ void signal_handler(int signo, siginfo_t *si, void *data)
 int main(int argc, char **argv) {
 	uint64_t threads;
 	uint64_t repeat;
+	int runworkload = 0;
+	int infinityrun = 0;
 
 	if (argc == 2)
 		threads = atoi(argv[1]);
@@ -76,36 +88,61 @@ int main(int argc, char **argv) {
 
 	set_workloads();
 
+        int nr_threads =  THREADS / MAX_WORKLOADS;
 
-        int nr_threads = THREADS / MAX_WORKLOADS;
+	// Parse opt
+	int opt;
+	while ((opt = getopt(argc, argv, "ialc:n:")) != -1) {
+		if (opt == 'l') {
+			//List all options
+			printf("Listing all workloads\n");
+			list_workloads();
+			exit(0);
+		} else if (opt == 'i') {
+			infinityrun = 1;
+		} else if (opt == 'c') {
+			int w = atoi(optarg);
+			if (w > nr_workloads) {
+				printf("Workload %d does not exist\n\n These are the available workloads:\n", w);
+				list_workloads();
+				exit(2);
+			}
+			printf("Running just workload %d (%s) \n", w, &wname[w]);
+			runworkload = atoi(optarg);
+		} else if (opt == 'a') {
+			printf("Running all workloads\n");
+			runworkload = 255;
+		} else if (opt == 'n') {
+			nr_threads = atoi(optarg);
+		}
+	}
+
+	if (!runworkload) {
+			printf("HTM torture\n");
+			printf(" -a	: Run all workloads\n");
+			printf(" -c	: Run just one workload\n");
+			printf(" -l	: List all workloads\n");
+			printf(" -i	: Run forever\n");
+			printf(" -n	: Amount of threads\n");
+			exit(1);
+	}
         printf("Thread per worload type: %d\n", nr_threads);
-
-        while (1) {
-
-        /**** WORKLOADS ****/
-
-        nr_threads = 450;
-
-        start_workers(0, nr_threads);
-        start_workers(1, nr_threads);
-        start_workers(2, nr_threads);
-        start_workers(3, nr_threads);
-        start_workers(4, nr_threads);
-        start_workers(5, nr_threads);
-        start_workers(6, nr_threads);
-
-        start_workers(7, nr_threads); //utpsm_qsort
-
-        start_workers(8, nr_threads); // Illegal instruction
-        start_workers(9, nr_threads); // trap
-        start_workers(10, nr_threads); // dscr
-
-
-        join_workers();
-
-        /*******************/
-
-        } 
-
-	return 0;
+	do {
+		if (runworkload != 255)
+			start_workers(runworkload, nr_threads);
+		else {
+			start_workers(0, nr_threads);
+			start_workers(1, nr_threads);
+			start_workers(2, nr_threads);
+			start_workers(3, nr_threads);
+			start_workers(4, nr_threads);
+			start_workers(5, nr_threads);
+			start_workers(6, nr_threads);
+			start_workers(7, nr_threads); //utpsm_qsort
+			start_workers(8, nr_threads); // Illegal instruction
+			start_workers(9, nr_threads); // trap
+			start_workers(10, nr_threads); // dscr
+			join_workers();
+		}
+	} while (infinityrun);
 }

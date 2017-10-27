@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <inttypes.h>
 #include <altivec.h>
 #include <pthread.h>
@@ -36,6 +37,8 @@ extern void workload10();
 
 // Array of workloads functions
 void (*workloads[MAX_WORKLOADS])();
+// TODO: Create a structure to keep both together
+char wname[MAX_WORKLOADS][1024];
 
 // not TLS (.bss)
 int nr_workloads;

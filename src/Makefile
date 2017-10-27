@@ -4,8 +4,7 @@ DEBUG = -O0 -g
 SRC = src
 DEPS = $(SRC)/torture.h
 
-%.o: $(SRC)/%.c $(DEPS)
-	$(CC) $(DEBUG) -c -o $@ $< $(CFLAGS)
+CFLAGS += $(DEBUG)
 
 torture: worker.o torture.o workload.o threads.o
 	$(CC) $(DEBUG) -o torture worker.o torture.o workload.o threads.o $(LDFLAGS)
