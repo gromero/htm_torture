@@ -22,9 +22,19 @@ void set_workloads() {
 	register_workload(workload4, "quicksort");           // quicksort
 	register_workload(workload5, "loop");                // loop
 	register_workload(workload6, "infite loop");         // infite loop
+	
+        // Preparation for workload7. TODO: improve argument passing to workloads like that.
+        array = (unsigned long *) calloc(ARRAY_SIZE, sizeof(unsigned long));
+
+        // Fill array with pseudo-random values.
+        for (uint64_t i = 0; i < ARRAY_SIZE; i++) array[i] = rand();
+
+        // Order array.
 	register_workload(utpsm_qsort, "utpsm_qsort");       // utpsm_qsort
+
 	register_workload(workload8, "illegal instruction"); // illegal instruction
 	register_workload(workload9, "trap");                // trap
+	register_workload(workload10, "dscr");                // dscr load restore
 
         printf("\n");
 }
@@ -56,9 +66,6 @@ int main(int argc, char **argv) {
 	printf("! = Transaction Failed but the VSX + VRSAVE registers were preserved\n");
 	printf(". = Transaction Succeeded (in that case VSX + VRSAVE registers are not checked\n\n");
 
-//	printf("Starting %"PRIu64 " threads\n", threads);
-//	printf("---------------------------\n");
-
 	// Install signal handler for all threads.
         struct sigaction sa;
 
@@ -66,7 +73,6 @@ int main(int argc, char **argv) {
 	sa.sa_sigaction = signal_handler;
 	sigaction(SIGTRAP, &sa, NULL);
 	sigaction(SIGILL,  &sa, NULL);
-
 
 	set_workloads();
 
@@ -78,8 +84,6 @@ int main(int argc, char **argv) {
 
         /**** WORKLOADS ****/
 
-        //init_workers();
-
         nr_threads = 450;
 
         start_workers(0, nr_threads);
@@ -90,13 +94,6 @@ int main(int argc, char **argv) {
         start_workers(5, nr_threads);
         start_workers(6, nr_threads);
 
-        // Preparation for workload7. TODO: improve argument passing to workloads like that.
-        array = (unsigned long *) calloc(ARRAY_SIZE, sizeof(unsigned long));
-
-        // Fill array with pseudo-random values.
-        for (uint64_t i = 0; i < ARRAY_SIZE; i++) array[i] = rand();
-
-        // Order array.
         start_workers(7, nr_threads); //utpsm_qsort
 
         start_workers(8, nr_threads); // Illegal instruction

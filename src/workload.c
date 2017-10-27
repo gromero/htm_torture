@@ -155,3 +155,8 @@ void workload8() {
 void workload9() {
   _ ("trap");
 }
+
+void workload10() {
+  _ ("mfdscr 9");
+  _ ("mtdscr 9");
+}
