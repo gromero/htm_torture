@@ -16,6 +16,7 @@ clean:
 	rm -f a.out
 	rm -f z
 	rm -fr torture
+	rm -fr cscope*
 
 cscope:
 	find . -name "*.c" -o -name "*.h" > cscope.files
