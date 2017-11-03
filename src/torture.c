@@ -1,5 +1,5 @@
 #include "torture.h"
-#define DEBUG 1 
+//#define DEBUG 1 
 
 void register_workload(void *func, char *description) {
 	int i = 0;
@@ -52,7 +52,7 @@ void set_workloads() {
 int main(int argc, char **argv) {
 	uint64_t threads;
 	uint64_t repeat;
-	int runworkload = 0;
+	int runworkload = UNINIT;
 	int infinityrun = 0;
 
 	printf("Hardware Transactional Memory Torture\n\n");
@@ -102,7 +102,7 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	if (!runworkload) {
+	if (runworkload == UNINIT) {
 			printf("HTM torture\n");
 			printf(" -a	: Run all workloads\n");
 			printf(" -s	: Run just a single workload\n");
@@ -131,20 +131,20 @@ int main(int argc, char **argv) {
 			join_workers();
 		} else if (runworkload == FAIL) {
 			printf("Starting workloads which the transactions will fail\n");
+			start_workers(0, nr_threads);
+			start_workers(1, nr_threads);
 			start_workers(3, nr_threads);
 			start_workers(6, nr_threads);
 			start_workers(8, nr_threads); // Illegal instruction
 			start_workers(9, nr_threads); // trap
-			start_workers(10, nr_threads); // dscr
 			join_workers();
 		} else if (runworkload == NON_FAIL) {
 			printf("Starting workloads which the transactions will commit\n");
-			start_workers(0, nr_threads);
-			start_workers(1, nr_threads);
 			start_workers(2, nr_threads);
 			start_workers(4, nr_threads);
 			start_workers(5, nr_threads);
 			start_workers(7, nr_threads); //utpsm_qsort
+			start_workers(10, nr_threads); // dscr
 			join_workers();
 		} else {
 			start_workers(runworkload, nr_threads);

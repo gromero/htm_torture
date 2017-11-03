@@ -50,6 +50,8 @@ uint64_t  num_used_threads;
 #define FAIL -1
 #define NON_FAIL -2
 #define ALL -255
+#define UNINIT ~0
+
 
 void init_workers(void);
 void start_workers(uint64_t, uint64_t);
