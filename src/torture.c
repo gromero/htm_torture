@@ -105,7 +105,7 @@ int main(int argc, char **argv) {
 	if (!runworkload) {
 			printf("HTM torture\n");
 			printf(" -a	: Run all workloads\n");
-			printf(" -w	: Run just a single workload\n");
+			printf(" -s	: Run just a single workload\n");
 			printf(" -l	: List all workloads\n");
 			printf(" -i	: Run forever\n");
 			printf(" -n	: Amount of threads\n");
