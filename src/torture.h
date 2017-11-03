@@ -55,7 +55,6 @@ void init_workers(void);
 void start_workers(uint64_t, uint64_t);
 void join_workers(void);
 
-extern void start_threads(uint64_t threads);
 extern void signal_handler(int signo, siginfo_t *si, void *data);
 extern void *worker(void *arg);
 
