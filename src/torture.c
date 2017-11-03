@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
 			runworkload = atoi(optarg);
 		} else if (opt == 'a') {
 			printf("Running all workloads\n");
-			runworkload = 255;
+			runworkload = ALL;
 		} else if (opt == 'n') {
 			nr_threads = atoi(optarg);
 		}
@@ -108,7 +108,7 @@ int main(int argc, char **argv) {
 			printf(" -w	: Run just a single workload\n");
 			printf(" -l	: List all workloads\n");
 			printf(" -i	: Run forever\n");
-			printf(" -t	: Amount of threads\n");
+			printf(" -n	: Amount of threads\n");
 			printf(" -c	: Only workloads that commit\n");
 			printf(" -f	: Only workloads that fails\n");
 			exit(1);
@@ -147,6 +147,8 @@ int main(int argc, char **argv) {
 			start_workers(7, nr_threads); //utpsm_qsort
 			join_workers();
 		} else {
+			printf("FAIL\n");
+			exit(1);
 			start_workers(runworkload, nr_threads);
 			join_workers();
 		}

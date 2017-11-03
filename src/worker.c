@@ -3,6 +3,10 @@
 
 void *worker(void *arg)
 {
+	uint64_t workload = (int) arg; // I know you will frown upon void * to int cast ;-)
+	
+	uint64_t nr;
+	uint64_t res;
 	// VSX registers. To be used in the future.
 	register vector __int128 vsx0 asm ("vs0");
 	register vector __int128 vsx1 asm ("vs1");
@@ -46,6 +50,10 @@ void *worker(void *arg)
 	
 	uint64_t offset = 0;
 	uint64_t z;
+
+#ifdef DEBUG
+	printf("Thread executing workload #%ld: ", wname[workload]);
+#endif
 	
 	// Expected correct values restored after a HTM failure.
 	vmx_correct_value[0]  = (vector __int128) {0xBEEF}; 
@@ -130,16 +138,8 @@ void *worker(void *arg)
 	   : "r5"
 	  );
 	
-	int work = rand() % (nr_workloads - 1);
-	uint64_t workload = (int) arg; // I know you will frown upon void * to int cast ;-)
-	
-	uint64_t nr;
-	uint64_t res;
 	
 	
-#ifdef DEBUG
-	printf("Thread executing workload #%ld: ", workload);
-#endif
 
 	/***************
 	 ** HTM BEGIN **
