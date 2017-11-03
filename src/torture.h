@@ -13,7 +13,7 @@
 // of THREADS is set in comparison to the number of workloads,
 // then it might be the case that some workload will not be
 // set to run.
-#define THREADS 4096*4
+#define THREADS 450
 #define REPEAT 1
 #define MAX_WORKLOADS 20
 
@@ -43,7 +43,7 @@ char wname[MAX_WORKLOADS][1024];
 // not TLS (.bss)
 int nr_workloads;
 
-pthread_t thread_pool[THREADS];
+pthread_t thread_pool[THREADS*MAX_WORKLOADS];
 uint64_t  num_used_threads;
 
 // Workload type
