@@ -147,8 +147,6 @@ int main(int argc, char **argv) {
 			start_workers(7, nr_threads); //utpsm_qsort
 			join_workers();
 		} else {
-			printf("FAIL\n");
-			exit(1);
 			start_workers(runworkload, nr_threads);
 			join_workers();
 		}
