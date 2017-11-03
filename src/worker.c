@@ -51,9 +51,8 @@ void *worker(void *arg)
 	uint64_t offset = 0;
 	uint64_t z;
 
-#ifdef DEBUG
-	printf("Thread executing workload #%ld: ", wname[workload]);
-#endif
+	if (debug)
+		printf("Thread executing workload %s: ", (char *) wname[workload]);
 	
 	// Expected correct values restored after a HTM failure.
 	vmx_correct_value[0]  = (vector __int128) {0xBEEF}; 
@@ -516,18 +515,15 @@ _value_mismatch:
 _value_match:
 	printf("!");
 	tm_fails++;
-	#ifdef DEBUG
-	printf(" HTM failed but VMX and VRSAVE registers are OK\n");
-	#endif
+	if (debug)
+		printf(" HTM failed but VMX and VRSAVE registers are OK\n");
 	goto _finish;
 
 _success:
 	printf(".");
 	tm_commit++;
-	#ifdef DEBUG
-	printf(" HTM succeeded\n");
-	#endif
-
+	if (debug)
+		printf(" HTM succeeded\n");
 _finish:
 	_ ("nop"); // Can't label in the void...
 

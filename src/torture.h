@@ -44,15 +44,16 @@ char wname[MAX_WORKLOADS][1024];
 int nr_workloads;
 long tm_fails;
 long tm_commit;
+int debug;
 
 pthread_t thread_pool[THREADS*MAX_WORKLOADS*4096];
 uint64_t  num_used_threads;
 
 // Workload type
-#define FAIL -1
-#define NON_FAIL -2
-#define ALL -255
-#define UNINIT ~0
+#define UNINIT 0
+#define FAIL 1
+#define NON_FAIL 2
+#define ALL 3
 
 
 void init_workers(void);

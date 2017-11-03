@@ -1,13 +1,11 @@
 #include "torture.h"
-//#define DEBUG 1 
 
 void register_workload(void *func, char *description) {
 	workloads[nr_workloads] = func;
 	strncpy(&wname[nr_workloads][0], description, 1024);
 
-	#ifdef DEBUG
-	printf("Registering workload %d (%s)\n", nr_workloads, description ? description : "no description available");
-	#endif
+	if (debug)
+		printf("Registering workload %d (%s)\n", nr_workloads, description ? description : "no description available");
 
 	nr_workloads++;
 }
@@ -52,9 +50,12 @@ int main(int argc, char **argv) {
 	int runworkload = UNINIT;
 	int infinityrun = 0;
 
-	printf("Hardware Transactional Memory Torture\n\n");
-	printf("! = Transaction Failed but the VSX + VRSAVE registers were preserved\n");
-	printf(". = Transaction Succeeded (in that case VSX + VRSAVE registers are not checked\n\n");
+	printf("Hardware Transactional Memory Torture\n");
+	printf("-------------------------------------\n");
+	if (debug) {
+		printf("! = Transaction Failed but the VSX + VRSAVE registers were preserved\n");
+		printf(". = Transaction Succeeded (in that case VSX + VRSAVE registers are not checked\n\n");
+	}
 
 	// Install signal handler for all threads.
         struct sigaction sa;
@@ -67,15 +68,19 @@ int main(int argc, char **argv) {
 	set_workloads();
 
         int nr_threads =  THREADS;
+	// Debug disabled
+	debug = 0;
 
 	// Parse opt
 	int opt;
-	while ((opt = getopt(argc, argv, "cfials:n:")) != -1) {
+	while ((opt = getopt(argc, argv, "vcfials:n:")) != -1) {
 		if (opt == 'l') {
 			//List all options
 			printf("Listing all workloads\n");
 			list_workloads();
 			exit(0);
+		} else if (opt == 'v') {
+			debug = 1;
 		} else if (opt == 'i') {
 			infinityrun = 1;
 		} else if (opt == 'f') {
@@ -108,10 +113,12 @@ int main(int argc, char **argv) {
 		printf(" -n	: Amount of threads\n");
 		printf(" -c	: Only workloads that commit\n");
 		printf(" -f	: Only workloads that fails\n");
+		printf(" -v	: Be verbose\n");
 		exit(1);
 	}
 
-        printf("Thread per worload type: %d\n", nr_threads);
+	if (debug)
+		printf("Thread per worload type: %d\n", nr_threads);
 
 	do {
 		if (runworkload == ALL) {
@@ -149,8 +156,10 @@ int main(int argc, char **argv) {
 	} while (infinityrun);
 
 	printf("\nStatistics:\n");
-	printf("TM fails  : %ld\n", tm_fails);
-	printf("TM commits: %ld\n", tm_commit);
-	printf("Fail Percentage: %1.2f \n", (float) tm_fails/(tm_fails + tm_commit));
+	if (debug) {
+		printf("TM fails  : %ld\n", tm_fails);
+		printf("TM commits: %ld\n", tm_commit);
+	}
+	printf("Fail Percentage: %1.2f %% \n", (float) 100*tm_fails/(tm_fails + tm_commit));
 
 }
