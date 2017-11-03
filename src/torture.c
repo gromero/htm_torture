@@ -103,17 +103,19 @@ int main(int argc, char **argv) {
 	}
 
 	if (runworkload == UNINIT) {
-			printf("HTM torture\n");
-			printf(" -a	: Run all workloads\n");
-			printf(" -s	: Run just a single workload\n");
-			printf(" -l	: List all workloads\n");
-			printf(" -i	: Run forever\n");
-			printf(" -n	: Amount of threads\n");
-			printf(" -c	: Only workloads that commit\n");
-			printf(" -f	: Only workloads that fails\n");
-			exit(1);
+		printf("HTM torture\n");
+		printf(" -a	: Run all workloads\n");
+		printf(" -s	: Run just a single workload\n");
+		printf(" -l	: List all workloads\n");
+		printf(" -i	: Run forever\n");
+		printf(" -n	: Amount of threads\n");
+		printf(" -c	: Only workloads that commit\n");
+		printf(" -f	: Only workloads that fails\n");
+		exit(1);
 	}
+
         printf("Thread per worload type: %d\n", nr_threads);
+
 	do {
 		if (runworkload == ALL) {
 			printf("Starting all workloads\n");
@@ -128,7 +130,6 @@ int main(int argc, char **argv) {
 			start_workers(8, nr_threads); // Illegal instruction
 			start_workers(9, nr_threads); // trap
 			start_workers(10, nr_threads); // dscr
-			join_workers();
 		} else if (runworkload == FAIL) {
 			printf("Starting workloads which the transactions will fail\n");
 			start_workers(0, nr_threads);
@@ -137,7 +138,6 @@ int main(int argc, char **argv) {
 			start_workers(6, nr_threads);
 			start_workers(8, nr_threads); // Illegal instruction
 			start_workers(9, nr_threads); // trap
-			join_workers();
 		} else if (runworkload == NON_FAIL) {
 			printf("Starting workloads which the transactions will commit\n");
 			start_workers(2, nr_threads);
@@ -145,11 +145,10 @@ int main(int argc, char **argv) {
 			start_workers(5, nr_threads);
 			start_workers(7, nr_threads); //utpsm_qsort
 			start_workers(10, nr_threads); // dscr
-			join_workers();
 		} else {
 			start_workers(runworkload, nr_threads);
-			join_workers();
 		}
+		join_workers();
 	} while (infinityrun);
 
 	printf("\nStatistics:\n");

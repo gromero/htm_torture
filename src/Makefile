@@ -1,5 +1,5 @@
 LDFLAGS = -lpthread
-CC = gcc -Wno-pointer-to-int-cast
+CC = gcc -Wno-pointer-to-int-cast -Wall
 DEBUG = -O0 -g
 SRC = src
 DEPS = $(SRC)/torture.h

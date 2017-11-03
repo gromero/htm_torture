@@ -45,7 +45,7 @@ int nr_workloads;
 long tm_fails;
 long tm_commit;
 
-pthread_t thread_pool[THREADS*MAX_WORKLOADS];
+pthread_t thread_pool[THREADS*MAX_WORKLOADS*4096];
 uint64_t  num_used_threads;
 
 // Workload type
