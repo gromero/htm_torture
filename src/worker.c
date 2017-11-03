@@ -8,42 +8,42 @@ void *worker(void *arg)
 	uint64_t nr;
 	uint64_t res;
 	// VSX registers. To be used in the future.
-	register vector __int128 vsx0 asm ("vs0");
-	register vector __int128 vsx1 asm ("vs1");
+	register vector __int128 vsx0 asm ("vs0") __attribute__((unused));
+	register vector __int128 vsx1 asm ("vs1") __attribute__((unused));
 	
 	// VMX registers. 
-	register vector __int128 vmx0  asm ("vs32"); 
-	register vector __int128 vmx1  asm ("vs33"); 
-	register vector __int128 vmx2  asm ("vs34"); 
-	register vector __int128 vmx3  asm ("vs35"); 
-	register vector __int128 vmx4  asm ("vs36"); 
-	register vector __int128 vmx5  asm ("vs37"); 
-	register vector __int128 vmx6  asm ("vs38"); 
-	register vector __int128 vmx7  asm ("vs39"); 
-	register vector __int128 vmx8  asm ("vs40"); 
-	register vector __int128 vmx9  asm ("vs41"); 
-	register vector __int128 vmx10 asm ("vs42"); 
-	register vector __int128 vmx11 asm ("vs43"); 
-	register vector __int128 vmx12 asm ("vs44"); 
-	register vector __int128 vmx13 asm ("vs45"); 
-	register vector __int128 vmx14 asm ("vs46"); 
-	register vector __int128 vmx15 asm ("vs47"); 
-	register vector __int128 vmx16 asm ("vs48"); 
-	register vector __int128 vmx17 asm ("vs49"); 
-	register vector __int128 vmx18 asm ("vs50"); 
-	register vector __int128 vmx19 asm ("vs51"); 
-	register vector __int128 vmx20 asm ("vs52"); 
-	register vector __int128 vmx21 asm ("vs53"); 
-	register vector __int128 vmx22 asm ("vs54"); 
-	register vector __int128 vmx23 asm ("vs55"); 
-	register vector __int128 vmx24 asm ("vs56"); 
-	register vector __int128 vmx25 asm ("vs57"); 
-	register vector __int128 vmx26 asm ("vs58"); 
-	register vector __int128 vmx27 asm ("vs59"); 
-	register vector __int128 vmx28 asm ("vs60"); 
-	register vector __int128 vmx29 asm ("vs61"); 
-	register vector __int128 vmx30 asm ("vs62"); 
-	register vector __int128 vmx31 asm ("vs63"); 
+	register vector __int128 vmx0  asm ("vs32") __attribute__((unused)); 
+	register vector __int128 vmx1  asm ("vs33") __attribute__((unused)); 
+	register vector __int128 vmx2  asm ("vs34") __attribute__((unused)); 
+	register vector __int128 vmx3  asm ("vs35") __attribute__((unused)); 
+	register vector __int128 vmx4  asm ("vs36") __attribute__((unused)); 
+	register vector __int128 vmx5  asm ("vs37") __attribute__((unused)); 
+	register vector __int128 vmx6  asm ("vs38") __attribute__((unused)); 
+	register vector __int128 vmx7  asm ("vs39") __attribute__((unused)); 
+	register vector __int128 vmx8  asm ("vs40") __attribute__((unused)); 
+	register vector __int128 vmx9  asm ("vs41") __attribute__((unused)); 
+	register vector __int128 vmx10 asm ("vs42") __attribute__((unused)); 
+	register vector __int128 vmx11 asm ("vs43") __attribute__((unused)); 
+	register vector __int128 vmx12 asm ("vs44") __attribute__((unused)); 
+	register vector __int128 vmx13 asm ("vs45") __attribute__((unused)); 
+	register vector __int128 vmx14 asm ("vs46") __attribute__((unused)); 
+	register vector __int128 vmx15 asm ("vs47") __attribute__((unused)); 
+	register vector __int128 vmx16 asm ("vs48") __attribute__((unused)); 
+	register vector __int128 vmx17 asm ("vs49") __attribute__((unused)); 
+	register vector __int128 vmx18 asm ("vs50") __attribute__((unused)); 
+	register vector __int128 vmx19 asm ("vs51") __attribute__((unused)); 
+	register vector __int128 vmx20 asm ("vs52") __attribute__((unused)); 
+	register vector __int128 vmx21 asm ("vs53") __attribute__((unused)); 
+	register vector __int128 vmx22 asm ("vs54") __attribute__((unused)); 
+	register vector __int128 vmx23 asm ("vs55") __attribute__((unused)); 
+	register vector __int128 vmx24 asm ("vs56") __attribute__((unused)); 
+	register vector __int128 vmx25 asm ("vs57") __attribute__((unused)); 
+	register vector __int128 vmx26 asm ("vs58") __attribute__((unused)); 
+	register vector __int128 vmx27 asm ("vs59") __attribute__((unused)); 
+	register vector __int128 vmx28 asm ("vs60") __attribute__((unused)); 
+	register vector __int128 vmx29 asm ("vs61") __attribute__((unused)); 
+	register vector __int128 vmx30 asm ("vs62") __attribute__((unused)); 
+	register vector __int128 vmx31 asm ("vs63") __attribute__((unused)); 
 	
 	vector __int128 vmx_correct_value[32];
 	vector __int128 vmx_scratch_area[2];
@@ -198,7 +198,7 @@ void *worker(void *arg)
 
 	// Call workload.
 	if (workloads[workload] == NULL) {
-		printf("ERROR: Workload %d is NULL. Aborting\n", workload);
+		printf("ERROR: Workload %ld is NULL. Aborting\n", workload);
 		exit(-200);
 	} else
 		(*workloads[workload])();
@@ -531,4 +531,6 @@ _success:
 _finish:
 	_ ("nop"); // Can't label in the void...
 
+
+	return 0;
 }

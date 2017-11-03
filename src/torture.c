@@ -2,7 +2,6 @@
 //#define DEBUG 1 
 
 void register_workload(void *func, char *description) {
-	int i = 0;
 	workloads[nr_workloads] = func;
 	strncpy(&wname[nr_workloads][0], description, 1024);
 
@@ -17,12 +16,12 @@ void list_workloads(){
 	int i;
 
 	for (i = 0 ; i < nr_workloads ; i++){
-		printf("%d:	: %s\n", i, &wname[i]);
+		printf("%d:	: %s\n", i, (char *) &wname[i]);
 	}
 }
 
 void set_workloads() {
-	memset(workloads, 0, MAX_WORKLOADS);
+	memset(workloads, 0, MAX_WORKLOADS*sizeof(void *));
 	nr_workloads = 0;
 
 	register_workload(workload0, "syscall");             // syscall
@@ -50,8 +49,6 @@ void set_workloads() {
 }
 
 int main(int argc, char **argv) {
-	uint64_t threads;
-	uint64_t repeat;
 	int runworkload = UNINIT;
 	int infinityrun = 0;
 
@@ -92,7 +89,7 @@ int main(int argc, char **argv) {
 				list_workloads();
 				exit(2);
 			}
-			printf("Running just workload %d (%s) \n", w, &wname[w]);
+			printf("Running just workload %d (%s) \n", w, (char *) &wname[w]);
 			runworkload = atoi(optarg);
 		} else if (opt == 'a') {
 			printf("Running all workloads\n");
@@ -154,6 +151,6 @@ int main(int argc, char **argv) {
 	printf("\nStatistics:\n");
 	printf("TM fails  : %ld\n", tm_fails);
 	printf("TM commits: %ld\n", tm_commit);
-	printf("Fail Percentage: %1.2f%\n", (float) tm_fails/(tm_fails + tm_commit));
+	printf("Fail Percentage: %1.2f \n", (float) tm_fails/(tm_fails + tm_commit));
 
 }

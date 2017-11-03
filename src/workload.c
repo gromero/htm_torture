@@ -17,7 +17,7 @@ int fib(int x){
 
 /* Run a fibonnaci of 40 inside transaction */
 void workload1() {
-	int sum;
+	int sum __attribute__((unused));
 	int n = 40;
 
 	sum = fib(n);
