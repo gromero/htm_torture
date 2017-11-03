@@ -1,3 +1,17 @@
+/*
+ * Copyright (c) 2017 Breno Leitao, Gustavo Romero, IBM Corp.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version
+ * 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ */
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -61,20 +75,6 @@ void QuickSort(unsigned long *a, int left, int right)
                 QuickSort(a, PivotLoc+1, right);
         }
 }
-
-/*
-int utpsm_qsort()
-{
-        int size = arrSize;
-        int left = 0, right = size-1;
-
-        QuickSort(arrBase, left, right);
-
-        Qsort_status = 0xAB1E0000;
-        return 0;
-}
-*/
-
 
 int main()
 {

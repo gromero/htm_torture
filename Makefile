@@ -2,17 +2,16 @@ LDFLAGS = -lpthread
 CC = gcc -Wno-pointer-to-int-cast -Wall
 DEBUG = -O0 -g
 SRC = src
-DEPS = $(SRC)/torture.h
 
 CFLAGS += $(DEBUG)
 
-torture: worker.o torture.o workload.o threads.o signal.o
-	$(CC) $(DEBUG) -o torture worker.o torture.o workload.o threads.o signal.o $(LDFLAGS)
+torture: $(SRC)/worker.o $(SRC)/torture.o $(SRC)/workload.o $(SRC)/threads.o $(SRC)/signal.o
+	$(CC) $(DEBUG) -o torture $(SRC)/worker.o $(SRC)/torture.o $(SRC)/workload.o $(SRC)/threads.o $(SRC)/signal.o $(LDFLAGS)
 
 all: torture
 
 clean:
-	rm -f *.o
+	rm -f $(SRC)/*.o
 	rm -f a.out
 	rm -f z
 	rm -fr torture
