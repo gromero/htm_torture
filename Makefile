@@ -1,12 +1,13 @@
 LDFLAGS = -lpthread
 CC = gcc -Wno-pointer-to-int-cast -Wall
 DEBUG = -O0 -g
+PREFIX ?= usr/local
 SRC = src
 DESTDIR =
-PREFIX ?= /usr/local
 BINDIR = $(PREFIX)/bin
 INSTALL ?= install
 CFLAGS += $(DEBUG)
+DOCUMENTATION = Documentation
 
 torture: $(SRC)/worker.o $(SRC)/torture.o $(SRC)/workload.o $(SRC)/threads.o $(SRC)/signal.o
 	$(CC) $(DEBUG) -o torture $(SRC)/worker.o $(SRC)/torture.o $(SRC)/workload.o $(SRC)/threads.o $(SRC)/signal.o $(LDFLAGS)
@@ -25,5 +26,9 @@ cscope:
 	cscope -q -R -b -i cscope.files
 
 install:
-	$(INSTALL) -d $(DESTDIR)$(BINDIR)
-	$(INSTALL) -m 755 torture $(DESTDIR)$(BINDIR)
+	mkdir -p $(DESTDIR)/$(BINDIR)
+	mkdir -p $(DESTDIR)/$(PREFIX)/share/man/man1
+	$(INSTALL) -d $(DESTDIR)/$(BINDIR)
+	$(INSTALL) -m 755 torture $(DESTDIR)/$(BINDIR)
+	$(INSTALL) -m 644 $(DOCUMENTATION)/torture.1 $(DESTDIR)/$(PREFIX)/share/man/man1
+	gzip -9 $(DESTDIR)/$(PREFIX)/share/man/man1/torture.1
