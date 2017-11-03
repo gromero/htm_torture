@@ -13,7 +13,7 @@
 // of THREADS is set in comparison to the number of workloads,
 // then it might be the case that some workload will not be
 // set to run.
-#define THREADS 1024*1024*25
+#define THREADS 4096*4
 #define REPEAT 1
 #define MAX_WORKLOADS 20
 
@@ -46,11 +46,17 @@ int nr_workloads;
 pthread_t thread_pool[THREADS];
 uint64_t  num_used_threads;
 
+// Workload type
+#define FAIL -1
+#define NON_FAIL -2
+#define ALL -255
+
 void init_workers(void);
 void start_workers(uint64_t, uint64_t);
 void join_workers(void);
 
 extern void start_threads(uint64_t threads);
+extern void signal_handler(int signo, siginfo_t *si, void *data);
 extern void *worker(void *arg);
 
 // #define DEBUG

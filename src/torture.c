@@ -49,30 +49,11 @@ void set_workloads() {
         printf("\n");
 }
 
-void signal_handler(int signo, siginfo_t *si, void *data)
-{
- // Set a local pointer to uc.
- // ucontext_t *uc = (ucontext_t *)data;
-
- // printf("* Received a SIGTRAP\n");
- // printf("* si->si_addr = %p\n", si->si_addr);
- // printf("* uc->uc_mcontext.regs->nip: %p\n", (void *) uc->uc_mcontext.regs->nip);
-
- // uc->uc_mcontext.regs->nip += 4; // Skip illegal instruction.
- // uc->uc_mcontext.gp_regs[32] += 4; // Same as above ;-)
-}
-
-	
 int main(int argc, char **argv) {
 	uint64_t threads;
 	uint64_t repeat;
 	int runworkload = 0;
 	int infinityrun = 0;
-
-	if (argc == 2)
-		threads = atoi(argv[1]);
-	else
-		threads = THREADS;
 
 	printf("Hardware Transactional Memory Torture\n\n");
 	printf("! = Transaction Failed but the VSX + VRSAVE registers were preserved\n");
@@ -88,11 +69,11 @@ int main(int argc, char **argv) {
 
 	set_workloads();
 
-        int nr_threads =  THREADS / MAX_WORKLOADS;
+        int nr_threads =  THREADS;
 
 	// Parse opt
 	int opt;
-	while ((opt = getopt(argc, argv, "ialc:n:")) != -1) {
+	while ((opt = getopt(argc, argv, "cfials:n:")) != -1) {
 		if (opt == 'l') {
 			//List all options
 			printf("Listing all workloads\n");
@@ -100,7 +81,11 @@ int main(int argc, char **argv) {
 			exit(0);
 		} else if (opt == 'i') {
 			infinityrun = 1;
+		} else if (opt == 'f') {
+			runworkload = FAIL;
 		} else if (opt == 'c') {
+			runworkload = NON_FAIL;
+		} else if (opt == 's') {
 			int w = atoi(optarg);
 			if (w > nr_workloads) {
 				printf("Workload %d does not exist\n\n These are the available workloads:\n", w);
@@ -120,17 +105,18 @@ int main(int argc, char **argv) {
 	if (!runworkload) {
 			printf("HTM torture\n");
 			printf(" -a	: Run all workloads\n");
-			printf(" -c	: Run just one workload\n");
+			printf(" -w	: Run just a single workload\n");
 			printf(" -l	: List all workloads\n");
 			printf(" -i	: Run forever\n");
-			printf(" -n	: Amount of threads\n");
+			printf(" -t	: Amount of threads\n");
+			printf(" -c	: Only workloads that commit\n");
+			printf(" -f	: Only workloads that fails\n");
 			exit(1);
 	}
         printf("Thread per worload type: %d\n", nr_threads);
 	do {
-		if (runworkload != 255)
-			start_workers(runworkload, nr_threads);
-		else {
+		if (runworkload == ALL) {
+			printf("Starting all workloads\n");
 			start_workers(0, nr_threads);
 			start_workers(1, nr_threads);
 			start_workers(2, nr_threads);
@@ -143,6 +129,27 @@ int main(int argc, char **argv) {
 			start_workers(9, nr_threads); // trap
 			start_workers(10, nr_threads); // dscr
 			join_workers();
+		} else if (runworkload == FAIL) {
+			printf("Starting workloads which the transactions will fail\n");
+			start_workers(3, nr_threads);
+			start_workers(6, nr_threads);
+			start_workers(8, nr_threads); // Illegal instruction
+			start_workers(9, nr_threads); // trap
+			start_workers(10, nr_threads); // dscr
+			join_workers();
+		} else if (runworkload == NON_FAIL) {
+			printf("Starting workloads which the transactions will commit\n");
+			start_workers(0, nr_threads);
+			start_workers(1, nr_threads);
+			start_workers(2, nr_threads);
+			start_workers(4, nr_threads);
+			start_workers(5, nr_threads);
+			start_workers(7, nr_threads); //utpsm_qsort
+			join_workers();
+		} else {
+			start_workers(runworkload, nr_threads);
+			join_workers();
 		}
 	} while (infinityrun);
+	printf("\n");
 }

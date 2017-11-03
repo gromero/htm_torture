@@ -6,14 +6,8 @@ DEPS = $(SRC)/torture.h
 
 CFLAGS += $(DEBUG)
 
-torture: worker.o torture.o workload.o threads.o
-	$(CC) $(DEBUG) -o torture worker.o torture.o workload.o threads.o $(LDFLAGS)
-
-asm:
-	gcc -S -fverbose-asm worker.c torture.c workload.c threads.c
-
-z: z.c
-	$(CC) $(DEBUG) z.c -o z
+torture: worker.o torture.o workload.o threads.o signal.o
+	$(CC) $(DEBUG) -o torture worker.o torture.o workload.o threads.o signal.o $(LDFLAGS)
 
 all: torture
 
