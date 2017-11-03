@@ -504,17 +504,18 @@ _value_mismatch:
 	_ ("mr %[res], 5 \n\t": [res] "=r"(res) : :);
 
        if (nr == 32) { // VRSAVE got corrupted
-         printf("Wordload %ld: register VRSAVE got corrupted.\n", workload);
-         printf("HTM failed and VRSAVE register got corrupted!\n");
-         exit(13);
+		printf("Wordload %ld: register VRSAVE got corrupted.\n", workload);
+		printf("HTM failed and VRSAVE register got corrupted!\n");
+		exit(13);
        } else {       // VSX/VMX got corrupted
-         printf("Workload %ld: register vs%"PRIu64 " contains value 0x%"PRIx64"\n", workload, nr+32, res);
-         printf("HTM failed and VMX registers got corrupted!\n");
-         exit(14);
+		printf("Workload %ld: register vs%"PRIu64 " contains value 0x%"PRIx64"\n", workload, nr+32, res);
+		printf("HTM failed and VMX registers got corrupted!\n");
+		exit(14);
        }
 
 _value_match:
 	printf("!");
+	tm_fails++;
 	#ifdef DEBUG
 	printf(" HTM failed but VMX and VRSAVE registers are OK\n");
 	#endif
@@ -522,6 +523,7 @@ _value_match:
 
 _success:
 	printf(".");
+	tm_commit++;
 	#ifdef DEBUG
 	printf(" HTM succeeded\n");
 	#endif

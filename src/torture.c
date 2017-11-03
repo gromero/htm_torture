@@ -151,5 +151,10 @@ int main(int argc, char **argv) {
 			join_workers();
 		}
 	} while (infinityrun);
-	printf("\n");
+
+	printf("\nStatistics:\n");
+	printf("TM fails  : %ld\n", tm_fails);
+	printf("TM commits: %ld\n", tm_commit);
+	printf("Fail Percentage: %1.2f%\n", (float) tm_fails/(tm_fails + tm_commit));
+
 }

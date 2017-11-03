@@ -42,6 +42,8 @@ char wname[MAX_WORKLOADS][1024];
 
 // not TLS (.bss)
 int nr_workloads;
+long tm_fails;
+long tm_commit;
 
 pthread_t thread_pool[THREADS*MAX_WORKLOADS];
 uint64_t  num_used_threads;
