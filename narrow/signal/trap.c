@@ -92,7 +92,7 @@ int main(int argc, char **argv)
   usr1_sa.sa_sigaction = usr1_signal_handler;
   sigaction(SIGUSR1, &usr1_sa, NULL);
 
-  // Set only CPU 0 in the mask. Both thread will be bind to cpu 0
+  // Set only CPU 0 in the mask. Both threads will be bind to cpu 0
   CPU_ZERO(&cpuset);
   CPU_SET(0, &cpuset);
 
@@ -100,6 +100,7 @@ int main(int argc, char **argv)
   pthread_attr_init(&attr);
 
   // Bind thread ping() and pong() both to CPU 0 to they ping-pong
+  // and fasten context switches on ping().
   pthread_attr_setaffinity_np(&attr, sizeof(cpu_set_t), &cpuset);
 
   pthread_create(&t0_ping, &attr /* bind to cpu 0 */, ping, NULL);
