@@ -18,6 +18,8 @@ void *ping(void *not_used)
 
   uint64_t i;
 
+  sleep(1); 
+  
   // Wait an amount of context switches so load_fp and load_vec overflows and
   // MSR_{FP|VEC|VSX} = 0
   for(i=0; i < 1024*1024*512; i++);
@@ -37,7 +39,8 @@ void *ping(void *not_used)
 	"   beq       1f        ;" // failure handler
 	"   trap                ;" // get into singal handler
 	"   tend.               ;" // end HTM
-	"1: nop                 ;"
+//	"1: .long 0x0           ;"
+        "1: nop                 ;"
  : : :);
 
   printf("Done. Returned fine from signal handler.\n");
@@ -50,6 +53,8 @@ void *ping(void *not_used)
 
 void *pong(void *not_used)
 {
+  sleep(1);
+
   while (!kill_myself)
     // Induce a bunch of context switches in ping() thread that is by now just
     // sitting idle in the for() idle loop
@@ -105,6 +110,9 @@ int main(int argc, char **argv)
 
   pthread_create(&t0_ping, &attr /* bind to cpu 0 */, ping, NULL);
   pthread_create(&t1_pong, &attr /* bind to cpu 0 */, pong, NULL);
+
+  pthread_setname_np(t0_ping, "ping");
+  pthread_setname_np(t1_pong, "pong");
 
   pthread_join(t0_ping, NULL);
   pthread_join(t1_pong, NULL);
