@@ -52,38 +52,48 @@ function pp(function_name: string)
 //r1 = register("r1")
 
 //printf("r1=0x%.16lx ", r1)
-  printf("regs->nip: 0x%.16lx ", regs_nip)
+//printf("regs->nip: 0x%.16lx ", regs_nip)
 	 
-  printf("regs->r1: 0x%.16lx ", regs_gpr1)
+//printf("regs->r1: 0x%.16lx ", regs_gpr1)
 
-  printf("ckpt_regs->r1: 0x%.16lx ", ckpt_regs_gpr1)
+//  printf("ckpt_regs->r1: 0x%.16lx ", ckpt_regs_gpr1)
 
-  printf("load_fp=0x%.2x load_vec=0x%.2x load_tm=0x%.2x used_vr=%d used_vsr=%d tm_texasr=0x%.16lx ", load_fp, load_vec, load_tm, used_vr, used_vsr, tm_texasr)
+//printf("load_fp=0x%.2x load_vec=0x%.2x load_tm=0x%.2x used_vr=%d used_vsr=%d tm_texasr=0x%.16lx ", load_fp, load_vec, load_tm, used_vr, used_vsr, tm_texasr)
 
-  printf("msr[ FP=%d VEC=%d VSX=%d TS=%d TM=%d ]   ", msr & 1 << 13 ? 1 : 0, // MSR_FP
-                                                      msr & 1 << 25 ? 1 : 0, // MSR_VEC
-                                                      msr & 1 << 23 ? 1 : 0, // MSR_VSX
-                                                      msr & (1 << 33 | 1 << 34) ? (msr & ( 1 << 33 | 1 << 34)) >> 33 : 0, // MSR_TS (2 bits)
-                                                      msr & 1 << 32 ? 1 : 0) // MSR_TM
 
-  printf("regs->msr[ FP=%d VEC=%d VSX=%d TS=%d TM=%d ]   ", regs_msr & 1 << 13 ? 1 : 0, // MSR_FP
+  printf("regs->msr=0x%.16lx [ LE=%d FP=%d VEC=%d VSX=%d TS=%d TM=%d ]   ", regs_msr, // MSR
+                                                            regs_msr & 1, // MSR LE (endianness)
+                                                            regs_msr & 1 << 13 ? 1 : 0, // MSR_FP
                                                             regs_msr & 1 << 25 ? 1 : 0, // MSR_VEC
                                                             regs_msr & 1 << 23 ? 1 : 0, // MSR_VSX
                                                             regs_msr & (1 << 33 | 1 << 34) ? (regs_msr & ( 1 << 33 | 1 << 34)) >> 33 : 0, // MSR_TS (2 bits)
                                                             regs_msr & 1 << 32 ? 1 : 0) // MSR_TM
 
-  printf("ckpt_regs->msr[ FP=%d VEC=%d VSX=%d TS=%d TM=%d ]   ", ckpt_regs_msr & 1 << 13 ? 1 : 0, // MSR_FP
+  printf("ckpt_regs->msr=0x%.16lx [ LE=%d FP=%d VEC=%d VSX=%d TS=%d TM=%d ]   ", ckpt_regs_msr, // MSR
+                                                                 ckpt_regs_msr & 1, // MSR LE (endianness)
+                                                                 ckpt_regs_msr & 1 << 13 ? 1 : 0, // MSR_FP
                                                                  ckpt_regs_msr & 1 << 25 ? 1 : 0, // MSR_VEC
                                                                  ckpt_regs_msr & 1 << 23 ? 1 : 0, // MSR_VSX
                                                                  ckpt_regs_msr & (1 << 33 | 1 << 34) ? (ckpt_regs_msr & ( 1 << 33 | 1 << 34)) >> 33 : 0, // MSR_TS (2 bits)
                                                                  ckpt_regs_msr & 1 << 32 ? 1 : 0) // MSR_TM
 
+  printf("msr=0x%.16lx [ LE=%d FP=%d VEC=%d VSX=%d TS=%d TM=%d ]   ", msd, // MSR
+                                                      msr & 1, // MSR LE (endianness)  
+                                                      msr & 1 << 13 ? 1 : 0, // MSR_FP
+                                                      msr & 1 << 25 ? 1 : 0, // MSR_VEC
+                                                      msr & 1 << 23 ? 1 : 0, // MSR_VSX
+                                                      msr & (1 << 33 | 1 << 34) ? (msr & ( 1 << 33 | 1 << 34)) >> 33 : 0, // MSR_TS (2 bits)
+                                                      msr & 1 << 32 ? 1 : 0) // MSR_TM
+
+  printf("load_fp=0x%.2x load_vec=0x%.2x load_tm=0x%.2x ", load_fp, load_vec, load_tm)
+
+/*
   try { 
     printf("trap=0x%.3x ", task_current()->thread->regs->trap);
   } catch {
     printf("trap=0x%.3x ", 0xbee);
   }
-
+*/
   printf("\n")
  }
 }
@@ -305,9 +315,14 @@ probe kernel.function("__switch_to_tm").return            { pp__("__switch_to_tm
 
 probe kernel.function("__switch_to").call                 { pp("__switch_to.call                ") }
 probe kernel.function("__switch_to").return               { pp("__switch_to.return              ") }
-
-probe kernel.function("restore_tm_sigcontexts").inline    { pp("restore_tm_sigcontexts.inline   ") }
-probe kernel.function("setup_tm_sigcontexts").inline      { pp("setup_tm_sigcontexts.inline     ") }
+*/
+probe kernel.function("restore_tm_sigcontexts").call         { pp("restore_tm_sigcontexts.call         ") }
+probe kernel.function("setup_tm_sigcontexts").inline         { pp("setup_tm_sigcontexts.inline         ") }
+probe kernel.function("check_if_tm_restore_required").call   { pp("check_if_tm_restore_required.call   ") } 
+probe kernel.function("check_if_tm_restore_required").return { pp("check_if_tm_restore_required.return ") } 
+probe kernel.function("giveup_all").call                     { pp("giveup_all.call                     ") }
+probe kernel.function("giveup_all").return                   { pp("giveup_all.return                   ") } 
+/*
 probe kernel.function("tm_reclaim").call                  { pp("tm_reclaim.call                 ") }
 probe kernel.function("tm_reclaim").return                { pp("tm_reclaim.return               ") }
 probe kernel.function("tm_reclaim_task").inline           { pp("tm_reclaim_task.inline          ") }
@@ -320,10 +335,10 @@ probe kernel.function("tm_reclaim_current").return        { pp("tm_reclaim_curre
 
 // probe kernel.function("tm_recheckpoint").call             { pp_("tm_recheckpoint.call            ", thread, orig_msr) }
 // probe kernel.function("tm_recheckpoint").return           { pp_("tm_recheckpoint.return          ", thread, orig_msr) }
-probe kernel.function("tm_recheckpoint").call                { pp("tm_recheckpoint.call            "); print_backtrace(); }
-probe kernel.function("tm_recheckpoint").return              { pp("tm_recheckpoint.return          "); print_backtrace(); }
-probe kernel.function("get_tm_stackpointer").call            { pp("get_tm_stackpointer.call        "); print_backtrace(); }
-probe kernel.function("get_tm_stackpointer").return          { pp("get_tm_stackpointer.return      "); print_backtrace(); }
+// probe kernel.function("tm_recheckpoint").call                { pp("tm_recheckpoint.call            "); print_backtrace(); }
+//probe kernel.function("tm_recheckpoint").return              { pp("tm_recheckpoint.return          "); print_backtrace(); }
+// probe kernel.function("get_tm_stackpointer").call            { pp("get_tm_stackpointer.call        "); print_backtrace(); }
+// probe kernel.function("get_tm_stackpointer").return          { pp("get_tm_stackpointer.return      "); print_backtrace(); }
 // probe kernel.function("tm_reclaim").call                     { pp("tm_reclaim.call                 ") }
 // probe kernel.function("tm_reclaim").return                   { pp("tm_reclaim.return               ") }
 // probe kernel.function("check_if_tm_restore_required").call   { pp("check_if_tm_restore_required.cl ") }
@@ -351,10 +366,10 @@ probe kernel.function("get_tm_stackpointer").return          { pp("get_tm_stackp
 // probe kernel.function("restore_math").return              { pp("restore_math.return             ") }
 
 // probe kernel.function("tm_unavailable").inline            { pp("tm_unavailable.inline           ") }
-probe kernel.function("handle_rt_signal64").call             { pp("handle_rt_signal64.call         "); print_backtrace(); }
-probe kernel.function("handle_rt_signal64").return           { pp("handle_rt_signal64.return       "); print_backtrace(); }
-probe kernel.function("setup_tm_sigcontexts")                { pp("setup_tm_sigcontexts.call       "); print_backtrace(); }
-probe kernel.function("setup_sigcontext")                    { pp("setup_sigcontext.call           "); print_backtrace(); }
+// probe kernel.function("handle_rt_signal64").call             { pp("handle_rt_signal64.call         "); print_backtrace(); }
+// probe kernel.function("handle_rt_signal64").return           { pp("handle_rt_signal64.return       "); print_backtrace(); }
+// probe kernel.function("setup_tm_sigcontexts")                { pp("setup_tm_sigcontexts.call       "); print_backtrace(); }
+// probe kernel.function("setup_sigcontext")                    { pp("setup_sigcontext.call           "); print_backtrace(); }
 
 // setup_tm_sigcontexts
 // setup_sigcontext
