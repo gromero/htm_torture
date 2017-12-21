@@ -13,6 +13,8 @@ int kill_myself = 0;
 pthread_t t0_ping;
 pthread_t t1_pong;
 
+int pass = 0;
+
 void *ping(void *not_used)
 {
 
@@ -34,17 +36,23 @@ void *ping(void *not_used)
   asm("vaddcuw 10, 10, 10;");
 #endif
 
-  asm (
-	"   tbegin.             ;" // begin HTM
-	"   beq       1f        ;" // failure handler
-	"   trap                ;" // get into singal handler
-	"   tend.               ;" // end HTM
-//	"1: .long 0x0           ;"
-        "1: nop                 ;"
- : : :);
+  asm goto (
+	"   tbegin.             ;" // tbegin.
+        "   tdi  0, 0, 0x48     ;" // if (BE) skip; else b .+8
+	"   trap                ;" // go to signal handler to flip endianness (BE->LE)
+        "  .long 0x1D05007C     ;" // tbegin. LE, i.e. start a new transaction
+        "  .long 0x0800e07f     ;" // trap LE -> go again to sig. handler but do not change endianness, if (BE) -> nop
+        "   b %l[fail]          ;" // flipped back to BE but should not
+        "   b %l[success]       ;" // still LE -> success  
+ : : : : fail, success);
 
-  printf("Done. Returned fine from signal handler.\n");
+fail:
+  printf("Failed!\n");
+  goto bail_out;
+success:
+  printf("Success!\n");
 
+bail_out:
   // Tell pong() to stop and return
   pthread_kill(t1_pong, SIGUSR1);
   return NULL;
@@ -64,12 +72,31 @@ void *pong(void *not_used)
 }
 
 
-void trap_signal_handler(int signo, siginfo_t *si, void *notused)
+void trap_signal_handler(int signo, siginfo_t *si, void *uc)
 {
+
+  ucontext_t *ucp = uc;
+
+  // ucp->uc_link = ucp;
+
+  if (pass == 0 ) {
+    ucp->uc_mcontext.gp_regs[PT_MSR] |= 1UL; // Set LE
+  }
+
+  // pass1 == 1, expected 
+ 
+  if (pass == 2) { // Still LE, i.e. MSR LE is not corrupted
+    ucp->uc_mcontext.gp_regs[PT_MSR] &= ~1UL;  // Set BE back
+    ucp->uc_mcontext.gp_regs[PT_NIP] += 8; // Success 
+  } 
+  
+  pass++;
+
+  //  asm volatile ("trap;");
   // Just print anything and return. Since we got here in HTM, we must just
   // get the failure handler since the transaction is aborted. Never a illegal
   // instruction
-  printf("I'm in the signal handler after a trap. Returning...\n");
+  // printf("I'm in the signal handler after a trap. Returning...\n");
 }
 
 
