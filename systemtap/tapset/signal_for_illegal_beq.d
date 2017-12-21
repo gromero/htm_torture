@@ -316,12 +316,17 @@ probe kernel.function("__switch_to_tm").return            { pp__("__switch_to_tm
 probe kernel.function("__switch_to").call                 { pp("__switch_to.call                ") }
 probe kernel.function("__switch_to").return               { pp("__switch_to.return              ") }
 */
-probe kernel.function("restore_tm_sigcontexts").call         { pp("restore_tm_sigcontexts.call         ") }
+probe kernel.function("restore_tm_sigcontexts").inline       { pp("restore_tm_sigcontexts.call         ") print_backtrace(); }
 probe kernel.function("setup_tm_sigcontexts").inline         { pp("setup_tm_sigcontexts.inline         ") }
 probe kernel.function("check_if_tm_restore_required").call   { pp("check_if_tm_restore_required.call   ") } 
 probe kernel.function("check_if_tm_restore_required").return { pp("check_if_tm_restore_required.return ") } 
 probe kernel.function("giveup_all").call                     { pp("giveup_all.call                     ") }
 probe kernel.function("giveup_all").return                   { pp("giveup_all.return                   ") } 
+probe kernel.function("handle_rt_signal64").call             { pp("handle_rt_signal64.call             ") }
+probe kernel.function("handle_rt_signal64").return           { pp("handle_rt_signal64.return           "); print_backtrace(); }
+probe kernel.function("sys_rt_sigreturn").call               { pp("sys_rt_sigreturn.call               "); print_backtrace(); }
+probe kernel.function("sys_rt_sigreturn").return             { pp("sys_rt_sigreturn.return             "); print_backtrace(); }
+
 /*
 probe kernel.function("tm_reclaim").call                  { pp("tm_reclaim.call                 ") }
 probe kernel.function("tm_reclaim").return                { pp("tm_reclaim.return               ") }
