@@ -1,0 +1,42 @@
+From 09572f3f4569a72a0e9afcf4d451ec10c0a9c5ad Mon Sep 17 00:00:00 2001
+From: Gustavo Romero <gromero@br.ibm.com>
+Date: Fri, 22 Dec 2017 12:53:21 -0500
+Subject: [PATCH] powerpc/tm: Fix endianness flip on trap
+
+Currently it's possible that a thread on PPC64 LE has its endianness
+flipped inadvertently to Big-Endian resulting on a crash once the process
+is back from the signal handler.
+
+This is because on setup_tm_sigcontexts() checkpointed MSR is incorrectly
+used instead of MSR. This patch fixes that by using MSR instead of
+checkpointed MSR to setup the signal frame.
+---
+ arch/powerpc/kernel/signal_64.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/arch/powerpc/kernel/signal_64.c b/arch/powerpc/kernel/signal_64.c
+index 4b9ca35..ea47666 100644
+--- a/arch/powerpc/kernel/signal_64.c
++++ b/arch/powerpc/kernel/signal_64.c
+@@ -207,7 +207,7 @@ static long setup_tm_sigcontexts(struct sigcontext __user *sc,
+ 	elf_vrreg_t __user *tm_v_regs = sigcontext_vmx_regs(tm_sc);
+ #endif
+ 	struct pt_regs *regs = tsk->thread.regs;
+-	unsigned long msr = tsk->thread.ckpt_regs.msr;
++	unsigned long msr = tsk->thread.regs->msr;
+ 	long err = 0;
+ 
+ 	BUG_ON(tsk != current);
+@@ -216,6 +216,9 @@ static long setup_tm_sigcontexts(struct sigcontext __user *sc,
+ 
+ 	WARN_ON(tm_suspend_disabled);
+ 
++        /* Restore checkpointed FP, VEC, and VSX bits */
++	msr |= tsk->thread.ckpt_regs.msr & (MSR_FP | MSR_VEC | MSR_VSX);
++
+ 	/* Remove TM bits from thread's MSR.  The MSR in the sigcontext
+ 	 * just indicates to userland that we were doing a transaction, but we
+ 	 * don't want to return in transactional state.  This also ensures
+-- 
+2.7.4
+
