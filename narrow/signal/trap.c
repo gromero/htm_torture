@@ -8,6 +8,10 @@
 #include <sched.h>
 #include <signal.h>
 
+
+#define BE 0UL
+#define LE 1UL
+
 int kill_myself = 0;
 
 pthread_t t0_ping;
@@ -20,8 +24,8 @@ void *ping(void *not_used)
 
   uint64_t i;
 
-  sleep(1); 
-  
+  sleep(1);
+
   // Wait an amount of context switches so load_fp and load_vec overflows and
   // MSR_{FP|VEC|VSX} = 0
   for(i=0; i < 1024*1024*512; i++);
@@ -37,13 +41,14 @@ void *ping(void *not_used)
 #endif
 
   asm goto (
-	"   tbegin.             ;" // tbegin.
+        "   tbegin.             ;" // tbegin.
         "   tdi  0, 0, 0x48     ;" // if (BE) skip; else b .+8
-	"   trap                ;" // go to signal handler to flip endianness (BE->LE)
+        "   trap                ;" // go to signal handler to flip endianness (BE->LE)
         "  .long 0x1D05007C     ;" // tbegin. LE, i.e. start a new transaction
         "  .long 0x0800e07f     ;" // trap LE -> go again to sig. handler but do not change endianness, if (BE) -> nop
         "   b %l[fail]          ;" // flipped back to BE but should not
-        "   b %l[success]       ;" // still LE -> success  
+        "   b %l[success]       ;" // still LE -> success
+
  : : : : fail, success);
 
 fail:
@@ -77,26 +82,46 @@ void trap_signal_handler(int signo, siginfo_t *si, void *uc)
 
   ucontext_t *ucp = uc;
 
+  printf("pass = %d\n", signo);
+  printf("%p\n", ucp->uc_mcontext.gp_regs[PT_NIP]);
+
+
+  // TODO: remove SIGTRAP check: it's always a sig trap handler
+  //     : remove it from main() also, the SIGTRAP binding
+
+  // if LE ====>
+
+  uint64_t endianness = 1UL & ucp->uc_mcontext.gp_regs[PT_MSR];
+
+  if (signo == SIGTRAP && pass == 1 && endianness == LE) {
+        printf("it's ok\n");
+  	ucp->uc_mcontext.gp_regs[PT_NIP] += 16; // goto success
+  }
+  else if (signo == SIGTRAP && pass == 1 && endianness == BE) {
+        ucp->uc_mcontext.gp_regs[PT_MSR] |= 1UL; // Set to LE
+	ucp->uc_mcontext.gp_regs[PT_NIP] += 4; // goto fail
+  }
+
+  pass++;
+
+ // if BE ====>
+
+/*
   // ucp->uc_link = ucp;
 
   if (pass == 0 ) {
     ucp->uc_mcontext.gp_regs[PT_MSR] |= 1UL; // Set LE
   }
 
-  // pass1 == 1, expected 
- 
+  // pass1 == 1, expected
+
   if (pass == 2) { // Still LE, i.e. MSR LE is not corrupted
     ucp->uc_mcontext.gp_regs[PT_MSR] &= ~1UL;  // Set BE back
-    ucp->uc_mcontext.gp_regs[PT_NIP] += 8; // Success 
-  } 
-  
-  pass++;
+    ucp->uc_mcontext.gp_regs[PT_NIP] += 8; // Success
+  }
 
-  //  asm volatile ("trap;");
-  // Just print anything and return. Since we got here in HTM, we must just
-  // get the failure handler since the transaction is aborted. Never a illegal
-  // instruction
-  // printf("I'm in the signal handler after a trap. Returning...\n");
+  pass++;
+*/
 }
 
 
@@ -117,6 +142,7 @@ int main(int argc, char **argv)
   trap_sa.sa_flags = SA_SIGINFO;
   trap_sa.sa_sigaction = trap_signal_handler;
   sigaction(SIGTRAP, &trap_sa, NULL);
+  sigaction(SIGILL, &trap_sa, NULL);
 
   struct sigaction usr1_sa;
 
