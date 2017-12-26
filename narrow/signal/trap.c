@@ -18,6 +18,85 @@ pthread_t t1_pong;
 int trap_event = 0;
 int le = 0;
 
+void trap_signal_handler(int signo, siginfo_t *si, void *uc)
+{
+
+  ucontext_t *ucp = uc;
+  uint64_t thread_endianness;
+
+  /* Get thread endianness */
+  thread_endianness = 1UL & ucp->uc_mcontext.gp_regs[PT_MSR];
+
+  /*
+   * Little-Endian Machine
+   */
+
+  if (le) {
+    /* First trap event */
+    if (trap_event == 0) {
+      // Do nothing, since it is returning from this trap
+      // event that endianness is flipped by the bug, so
+      // we just let the process return from the signal
+      // handler to check on the second trap event if
+      // endianness is flipped or not.
+    }
+    /* Second trap event */
+    if (trap_event == 1)
+      // If (A) endiannes is still LE and since we got a trap
+      // in TM, instruction (1) will be executed
+      // on return (rollback to tbegin. + 4). As (1) does nothing in effect,
+      // instruction (2) is executed again and so a 'trap' is executed (but not
+      // in TM). On the other hand, if (B) endiannes is BE, i.e. flipped,
+      // instruction (1) is treated as a b .+4, so instructions (3) and
+      // (4) are executed ('tbegin.' and 'trap') instead and we get again
+      // a trap (but in TM mode). In either case (A or B) we can then check
+      // the MSR LE bit in the signal handler to see if endianness was
+      // flipped (bug is present) or not on the first trap. Getting a trap in
+      // non-TM mode (case A) or in TM mode (case B) are just worth noting
+      // because after checking for endianness flip we manipulate NIP to
+      // return a success or fail: NIP on trap + TM is the (tbegin. + 4)
+      // address whilst NIP on trap - TM is the address of 'trap' instruction.
+      if (thread_endianness == LE) {
+        ucp->uc_mcontext.gp_regs[PT_NIP] += 16;  // Goto 'success'
+      } else { // Thread endianness is BE, so it flipped inadvertently
+        ucp->uc_mcontext.gp_regs[PT_MSR] |= 1UL; // Flip back to LE
+        ucp->uc_mcontext.gp_regs[PT_NIP] += 4;   // Goto 'fail'
+      }
+
+  /*
+   * Big-Endian Machine
+   */
+
+  } else {
+    /* First trap event */
+    if (trap_event == 0) {
+      // Force thread endianness flip to LE
+      ucp->uc_mcontext.gp_regs[PT_MSR] |= 1UL;
+    /* Second trap event */
+    } else if (trap_event == 1) {
+      // Do nothing. If the bug is present on return from this
+      // trap event endianness will flip back "automatically" to
+      // BE, otherwise thread endianness will continue to be LE,
+      // just as we set on first trap event above.
+    /* A third trap event */
+    } else {
+      // If we reached out here it's because we got a third trap
+      // event in TM, meaning that instruction (4) was
+      // executed as 'trap', hence thread endianness
+      // is still LE and so no bug flipped back to BE on return
+      // from second trap event. Otherwise, bug flipped back to BE on
+      // return from the second trap event and so instruction (4)
+      // was executed as 'tdi 0, 0,-8065' (a skip so) and branch to
+      // 'fail' is taken after instruction (5) to indicate failure
+      // and we never reach out here.
+      ucp->uc_mcontext.gp_regs[PT_MSR] &= ~1UL; // Flip back to BE
+      ucp->uc_mcontext.gp_regs[PT_NIP] += 8;    // Goto 'success'
+    }
+  }
+
+  trap_event++;
+}
+
 void *ping(void *not_used)
 {
 
@@ -41,12 +120,12 @@ void *ping(void *not_used)
 
   asm goto (
         "   tbegin.             ;" // (0) tbegin.
-        "   tdi  0, 0, 0x48     ;" // (1) if (BE) skip; else b .+8
-        "   trap                ;" // (2) go to signal handler to flip endianness (BE->LE)
-        "  .long 0x1D05007C     ;" // (3) tbegin. LE, i.e. start a new transaction
-        "  .long 0x0800e07f     ;" // (4) trap LE -> go again to sig. handler but do not change endianness, if (BE) -> nop
-        "   b %l[fail]          ;" // (5) flipped back to BE but should not
-        "   b %l[success]       ;" // (6) still LE -> success
+        "   tdi  0, 0, 0x48     ;" // (1) 'tdi' (skip) or 'b .+8'
+        "   trap                ;" // (2) trap
+        "  .long 0x1D05007C     ;" // (3) tbegin. in LE (BE machine)
+        "  .long 0x0800e07f     ;" // (4) 'trap' in LE, 'tdi' (skip) in BE (BE machine)
+        "   b %l[fail]          ;" // (5) MSR LE flipped back to BE, but it should not
+        "   b %l[success]       ;" // (6) MSR LE is still LE, so ok
 
  : : : : fail, success);
 
@@ -77,47 +156,6 @@ void *pong(void *not_used)
 }
 
 
-void trap_signal_handler(int signo, siginfo_t *si, void *uc)
-{
-
-  ucontext_t *ucp = uc;
-  uint64_t thread_endianness;
-
-  thread_endianness = 1UL & ucp->uc_mcontext.gp_regs[PT_MSR];
-
-//printf("Signal number: %d\n", signo);
-//printf("%p\n", ucp->uc_mcontext.gp_regs[PT_NIP]);
-
-  if (le) { // Little-Endian machine
-    if (trap_event == 1) // It's the second trap event
-      if (thread_endianness == LE) {
-        ucp->uc_mcontext.gp_regs[PT_NIP] += 16;  // Goto 'success'
-      } else { // Thread endianness is BE, so it flipped inadvertently
-        ucp->uc_mcontext.gp_regs[PT_MSR] |= 1UL; // Flip back to LE
-        ucp->uc_mcontext.gp_regs[PT_NIP] += 4;   // Goto 'fail'
-      }
-
-  } else {  // Big-Endian machine
-    if (trap_event == 0) { // It's the first trap event
-      // Force thread endianness flip to LE
-      ucp->uc_mcontext.gp_regs[PT_MSR] |= 1UL;
-    } else if (trap_event == 1) {
-      // Do nothing. If the bug is present on return from this
-      // trap event endiannes will flip back "automatically" to
-      // BE, otherwise thread endianness will continue to be LE,
-      // just as we set on first trap event above (trap_event == 0).
-    } else { // trap event 2 (third trap event)
-      // If we reached out here it's because we got a third trap
-      // event, meaning that instruction X was executed as a 'trap'
-      // instruction, hence thread endiannes is still LE, so the
-      // bug did flip back to BE on return from trap event 1.
-      ucp->uc_mcontext.gp_regs[PT_MSR] &= ~1UL; // Flip back to BE
-      ucp->uc_mcontext.gp_regs[PT_NIP] += 8;    // Goto 'success'
-    }
-  }
-
-  trap_event++;
-}
 
 void usr1_signal_handler(int signo, siginfo_t *si, void *not_used)
 {
