@@ -18,58 +18,58 @@
 void *worker(void *arg)
 {
 	uint64_t workload = (int) arg; // I know you will frown upon void * to int cast ;-)
-	
+
 	uint64_t nr;
 	uint64_t res;
 	// VSX registers. To be used in the future.
 	register vector __int128 vsx0 asm ("vs0") __attribute__((unused));
 	register vector __int128 vsx1 asm ("vs1") __attribute__((unused));
-	
-	// VMX registers. 
-	register vector __int128 vmx0  asm ("vs32") __attribute__((unused)); 
-	register vector __int128 vmx1  asm ("vs33") __attribute__((unused)); 
-	register vector __int128 vmx2  asm ("vs34") __attribute__((unused)); 
-	register vector __int128 vmx3  asm ("vs35") __attribute__((unused)); 
-	register vector __int128 vmx4  asm ("vs36") __attribute__((unused)); 
-	register vector __int128 vmx5  asm ("vs37") __attribute__((unused)); 
-	register vector __int128 vmx6  asm ("vs38") __attribute__((unused)); 
-	register vector __int128 vmx7  asm ("vs39") __attribute__((unused)); 
-	register vector __int128 vmx8  asm ("vs40") __attribute__((unused)); 
-	register vector __int128 vmx9  asm ("vs41") __attribute__((unused)); 
-	register vector __int128 vmx10 asm ("vs42") __attribute__((unused)); 
-	register vector __int128 vmx11 asm ("vs43") __attribute__((unused)); 
-	register vector __int128 vmx12 asm ("vs44") __attribute__((unused)); 
-	register vector __int128 vmx13 asm ("vs45") __attribute__((unused)); 
-	register vector __int128 vmx14 asm ("vs46") __attribute__((unused)); 
-	register vector __int128 vmx15 asm ("vs47") __attribute__((unused)); 
-	register vector __int128 vmx16 asm ("vs48") __attribute__((unused)); 
-	register vector __int128 vmx17 asm ("vs49") __attribute__((unused)); 
-	register vector __int128 vmx18 asm ("vs50") __attribute__((unused)); 
-	register vector __int128 vmx19 asm ("vs51") __attribute__((unused)); 
-	register vector __int128 vmx20 asm ("vs52") __attribute__((unused)); 
-	register vector __int128 vmx21 asm ("vs53") __attribute__((unused)); 
-	register vector __int128 vmx22 asm ("vs54") __attribute__((unused)); 
-	register vector __int128 vmx23 asm ("vs55") __attribute__((unused)); 
-	register vector __int128 vmx24 asm ("vs56") __attribute__((unused)); 
-	register vector __int128 vmx25 asm ("vs57") __attribute__((unused)); 
-	register vector __int128 vmx26 asm ("vs58") __attribute__((unused)); 
-	register vector __int128 vmx27 asm ("vs59") __attribute__((unused)); 
-	register vector __int128 vmx28 asm ("vs60") __attribute__((unused)); 
-	register vector __int128 vmx29 asm ("vs61") __attribute__((unused)); 
-	register vector __int128 vmx30 asm ("vs62") __attribute__((unused)); 
-	register vector __int128 vmx31 asm ("vs63") __attribute__((unused)); 
-	
+
+	// VMX registers.
+	register vector __int128 vmx0  asm ("vs32") __attribute__((unused));
+	register vector __int128 vmx1  asm ("vs33") __attribute__((unused));
+	register vector __int128 vmx2  asm ("vs34") __attribute__((unused));
+	register vector __int128 vmx3  asm ("vs35") __attribute__((unused));
+	register vector __int128 vmx4  asm ("vs36") __attribute__((unused));
+	register vector __int128 vmx5  asm ("vs37") __attribute__((unused));
+	register vector __int128 vmx6  asm ("vs38") __attribute__((unused));
+	register vector __int128 vmx7  asm ("vs39") __attribute__((unused));
+	register vector __int128 vmx8  asm ("vs40") __attribute__((unused));
+	register vector __int128 vmx9  asm ("vs41") __attribute__((unused));
+	register vector __int128 vmx10 asm ("vs42") __attribute__((unused));
+	register vector __int128 vmx11 asm ("vs43") __attribute__((unused));
+	register vector __int128 vmx12 asm ("vs44") __attribute__((unused));
+	register vector __int128 vmx13 asm ("vs45") __attribute__((unused));
+	register vector __int128 vmx14 asm ("vs46") __attribute__((unused));
+	register vector __int128 vmx15 asm ("vs47") __attribute__((unused));
+	register vector __int128 vmx16 asm ("vs48") __attribute__((unused));
+	register vector __int128 vmx17 asm ("vs49") __attribute__((unused));
+	register vector __int128 vmx18 asm ("vs50") __attribute__((unused));
+	register vector __int128 vmx19 asm ("vs51") __attribute__((unused));
+	register vector __int128 vmx20 asm ("vs52") __attribute__((unused));
+	register vector __int128 vmx21 asm ("vs53") __attribute__((unused));
+	register vector __int128 vmx22 asm ("vs54") __attribute__((unused));
+	register vector __int128 vmx23 asm ("vs55") __attribute__((unused));
+	register vector __int128 vmx24 asm ("vs56") __attribute__((unused));
+	register vector __int128 vmx25 asm ("vs57") __attribute__((unused));
+	register vector __int128 vmx26 asm ("vs58") __attribute__((unused));
+	register vector __int128 vmx27 asm ("vs59") __attribute__((unused));
+	register vector __int128 vmx28 asm ("vs60") __attribute__((unused));
+	register vector __int128 vmx29 asm ("vs61") __attribute__((unused));
+	register vector __int128 vmx30 asm ("vs62") __attribute__((unused));
+	register vector __int128 vmx31 asm ("vs63") __attribute__((unused));
+
 	vector __int128 vmx_correct_value[32];
 	vector __int128 vmx_scratch_area[2];
-	
+
 	uint64_t offset = 0;
 	uint64_t z;
 
 	if (debug)
 		printf("Thread executing workload %s: ", (char *) wname[workload]);
-	
+
 	// Expected correct values restored after a HTM failure.
-	vmx_correct_value[0]  = (vector __int128) {0xBEEF}; 
+	vmx_correct_value[0]  = (vector __int128) {0xBEEF};
 	vmx_correct_value[1]  = (vector __int128) {0xBEEF};
 	vmx_correct_value[2]  = (vector __int128) {0xBEEF};
 	vmx_correct_value[3]  = (vector __int128) {0xBEEF};
@@ -101,11 +101,11 @@ void *worker(void *arg)
 	vmx_correct_value[29] = (vector __int128) {0xBEEF};
 	vmx_correct_value[30] = (vector __int128) {0xBEEF};
 	vmx_correct_value[31] = (vector __int128) {0xBEEF};
-	
+
 	// Expected correct value restored to VRSAVE after a HTM failure.
 	uint64_t vrsave_correct_value[1];     // A place to keep the correct value in memory
 	vrsave_correct_value[0] = 0xBABEBEEF; // The correct value itself, a 32-bit value
-	
+
 	// Set values for each VMX register just before entering in a transactional block.
 	// Values below must match the expected correct values after a HTM failure,
 	// as specified in the code section above. TODO: add random generated value as
@@ -142,7 +142,7 @@ void *worker(void *arg)
 	vmx29 = (vector __int128) {0xBEEF};
 	vmx30 = (vector __int128) {0xBEEF};
 	vmx31 = (vector __int128) {0xBEEF};
-	
+
 	// Set value for VRSAVE register just before entering in HTM block.
 	_ ("lwz 5, 0(%[vrsave_correct_value]) \n\t"
 	   "mtvrsave 5                        \n\t"
@@ -150,9 +150,9 @@ void *worker(void *arg)
 	   : [vrsave_correct_value] "r"(vrsave_correct_value)
 	   : "r5"
 	  );
-	
-	
-	
+
+
+
 
 	/***************
 	 ** HTM BEGIN **
@@ -232,7 +232,7 @@ _failure:
 	"cmpd     5, 6                          \n\t"
 	"li       6, 32                         \n\t"
 	"bne  %l[_value_mismatch]               \n\t"
-	
+
 	// Check if vmx0 is sane.
 	"stvx 1, 0, %[vmx_scratch_area]   \n\t"
 	"lvx  1, 0, %[vmx_correct_value]  \n\t"
@@ -241,7 +241,7 @@ _failure:
 	"mfvrd 5, 0                       \n\t"
 	"li     6, 0                      \n\t"
 	"bc   4, 24, %l[_value_mismatch]  \n\t"
-	
+
 	// Check if vmx1 is sane.
 	"addi %[offset], %[offset], 16    \n\t"
 	"lvx  0, %[offset], %[vmx_correct_value]  \n\t"
@@ -249,7 +249,7 @@ _failure:
 	"mfvrd 5, 1                       \n\t"
 	"li     6, 1                      \n\t"
 	"bc 4, 24, %l[_value_mismatch]    \n\t"
-	
+
 	// Check if vmx2 is sane.
 	"addi %[offset], %[offset], 16    \n\t"
 	"lvx  0, %[offset], %[vmx_correct_value]  \n\t"
@@ -257,7 +257,7 @@ _failure:
 	"mfvrd 5, 2 \n\t"
 	"li     6, 2 \n\t"
 	"bc 4, 24, %l[_value_mismatch]    \n\t"
-	
+
 	// Check if vmx3 is sane.
 	"addi %[offset], %[offset], 16    \n\t"
 	"lvx  0, %[offset], %[vmx_correct_value] \n\t"
@@ -265,7 +265,7 @@ _failure:
 	"mfvrd 5, 3 \n\t"
 	"li     6, 3 \n\t"
 	"bc 4, 24, %l[_value_mismatch]    \n\t"
-	
+
 	// Check if vmx4 is sane.
 	"addi %[offset], %[offset], 16    \n\t"
 	"lvx  0, %[offset], %[vmx_correct_value] \n\t"
@@ -273,7 +273,7 @@ _failure:
 	"mfvrd 5, 4 \n\t"
 	"li     6, 4 \n\t"
 	"bc 4, 24, %l[_value_mismatch]    \n\t"
-	
+
 	// Check if vmx5 is sane.
 	"addi %[offset], %[offset], 16    \n\t"
 	"lvx  0, %[offset], %[vmx_correct_value] \n\t"
@@ -281,7 +281,7 @@ _failure:
 	"mfvrd 5, 5 \n\t"
 	"li     6, 5 \n\t"
 	"bc 4, 24, %l[_value_mismatch]    \n\t"
-	
+
 	// Check if vmx6 is sane.
 	"addi %[offset], %[offset], 16    \n\t"
 	"lvx  0, %[offset], %[vmx_correct_value] \n\t"
@@ -289,7 +289,7 @@ _failure:
 	"mfvrd 5, 6 \n\t"
 	"li     6, 6 \n\t"
 	"bc 4, 24, %l[_value_mismatch]    \n\t"
-	
+
 	// Check if vmx7 is sane.
 	"addi %[offset], %[offset], 16    \n\t"
 	"lvx  0, %[offset], %[vmx_correct_value] \n\t"
@@ -297,7 +297,7 @@ _failure:
 	"mfvrd 5, 7 \n\t"
 	"li     6, 7 \n\t"
 	"bc 4, 24, %l[_value_mismatch]    \n\t"
-	
+
 	// Check if vmx8 is sane.
 	"addi %[offset], %[offset], 16    \n\t"
 	"lvx  0, %[offset], %[vmx_correct_value] \n\t"
@@ -305,7 +305,7 @@ _failure:
 	"mfvrd 5, 8 \n\t"
 	"li     6, 8 \n\t"
 	"bc 4, 24, %l[_value_mismatch]    \n\t"
-	
+
 	// Check if vmx9 is sane.
 	"addi %[offset], %[offset], 16    \n\t"
 	"lvx  0, %[offset], %[vmx_correct_value] \n\t"
@@ -313,7 +313,7 @@ _failure:
 	"mfvrd 5, 9 \n\t"
 	"li     6, 9 \n\t"
 	"bc 4, 24, %l[_value_mismatch]    \n\t"
-	
+
 	// Check if vmx10 is sane.
 	"addi %[offset], %[offset], 16    \n\t"
 	"lvx  0, %[offset], %[vmx_correct_value] \n\t"
@@ -321,7 +321,7 @@ _failure:
 	"mfvrd 5, 10 \n\t"
 	"li     6, 10 \n\t"
 	"bc 4, 24, %l[_value_mismatch]    \n\t"
-	
+
 	// Check if vmx11 is sane.
 	"addi %[offset], %[offset], 16    \n\t"
 	"lvx  0, %[offset], %[vmx_correct_value] \n\t"
@@ -329,7 +329,7 @@ _failure:
 	"mfvrd 5, 11 \n\t"
 	"li     6, 11 \n\t"
 	"bc 4, 24, %l[_value_mismatch]    \n\t"
-	
+
 	// Check if vmx12 is sane.
 	"addi %[offset], %[offset], 16    \n\t"
 	"lvx  0, %[offset], %[vmx_correct_value] \n\t"
@@ -337,7 +337,7 @@ _failure:
 	"mfvrd 5, 12 \n\t"
 	"li     6, 12 \n\t"
 	"bc 4, 24, %l[_value_mismatch]    \n\t"
-	
+
 	// Check if vmx13 is sane.
 	"addi %[offset], %[offset], 16    \n\t"
 	"lvx  0, %[offset], %[vmx_correct_value] \n\t"
@@ -345,7 +345,7 @@ _failure:
 	"mfvrd 5, 13 \n\t"
 	"li     6, 13 \n\t"
 	"bc 4, 24, %l[_value_mismatch]    \n\t"
-	
+
 	// Check if vmx14 is sane.
 	"addi %[offset], %[offset], 16    \n\t"
 	"lvx  0, %[offset], %[vmx_correct_value] \n\t"
@@ -353,7 +353,7 @@ _failure:
 	"mfvrd 5, 14 \n\t"
 	"li     6, 14 \n\t"
 	"bc 4, 24, %l[_value_mismatch]    \n\t"
-	
+
 	// Check if vmx15 is sane.
 	"addi %[offset], %[offset], 16    \n\t"
 	"lvx  0, %[offset], %[vmx_correct_value] \n\t"
@@ -361,7 +361,7 @@ _failure:
 	"mfvrd 5, 15 \n\t"
 	"li     6, 15 \n\t"
 	"bc 4, 24, %l[_value_mismatch]    \n\t"
-	
+
 	// Check if vmx16 is sane.
 	"addi %[offset], %[offset], 16    \n\t"
 	"lvx  0, %[offset], %[vmx_correct_value] \n\t"
@@ -369,7 +369,7 @@ _failure:
 	"mfvrd 5, 16 \n\t"
 	"li     6, 16 \n\t"
 	"bc 4, 24, %l[_value_mismatch]    \n\t"
-	
+
 	// Check if vmx17 is sane.
 	"addi %[offset], %[offset], 16    \n\t"
 	"lvx  0, %[offset], %[vmx_correct_value] \n\t"
@@ -377,7 +377,7 @@ _failure:
 	"mfvrd 5, 17 \n\t"
 	"li     6, 17 \n\t"
 	"bc 4, 24, %l[_value_mismatch]    \n\t"
-	
+
 	// Check if vmx18 is sane.
 	"addi %[offset], %[offset], 16    \n\t"
 	"lvx  0, %[offset], %[vmx_correct_value] \n\t"
@@ -385,7 +385,7 @@ _failure:
 	"mfvrd 5, 18 \n\t"
 	"li     6, 18 \n\t"
 	"bc 4, 24, %l[_value_mismatch]    \n\t"
-	
+
 	// Check if vmx19 is sane.
 	"addi %[offset], %[offset], 16    \n\t"
 	"lvx  0, %[offset], %[vmx_correct_value] \n\t"
@@ -393,7 +393,7 @@ _failure:
 	"mfvrd 5, 19 \n\t"
 	"li     6, 19 \n\t"
 	"bc 4, 24, %l[_value_mismatch]    \n\t"
-	
+
 	// Check if vmx20 is sane.
 	"addi %[offset], %[offset], 16    \n\t"
 	"lvx  0, %[offset], %[vmx_correct_value] \n\t"
@@ -401,7 +401,7 @@ _failure:
 	"mfvrd 5, 20 \n\t"
 	"li     6, 20 \n\t"
 	"bc 4, 24, %l[_value_mismatch]    \n\t"
-	
+
 	// Check if vmx21 is sane.
 	"addi %[offset], %[offset], 16    \n\t"
 	"lvx  0, %[offset], %[vmx_correct_value] \n\t"
@@ -409,7 +409,7 @@ _failure:
 	"mfvrd 5, 21 \n\t"
 	"li     6, 21 \n\t"
 	"bc 4, 24, %l[_value_mismatch]    \n\t"
-	
+
 	// Check if vmx22 is sane.
 	"addi %[offset], %[offset], 16    \n\t"
 	"lvx  0, %[offset], %[vmx_correct_value] \n\t"
@@ -417,85 +417,85 @@ _failure:
 	"mfvrd 5, 22 \n\t"
 	"li     6, 22 \n\t"
 	"bc 4, 24, %l[_value_mismatch]    \n\t"
-	
-	// Check if vmx23 is sane. 
-	"addi %[offset], %[offset], 16    \n\t" 
-	"lvx  0, %[offset], %[vmx_correct_value] \n\t" 
-	"vcmpequb. 0, 0, 23               \n\t" 
+
+	// Check if vmx23 is sane.
+	"addi %[offset], %[offset], 16    \n\t"
+	"lvx  0, %[offset], %[vmx_correct_value] \n\t"
+	"vcmpequb. 0, 0, 23               \n\t"
 	"mfvrd 5, 23 \n\t"
 	"li     6, 23 \n\t"
-	"bc 4, 24, %l[_value_mismatch]    \n\t" 
-	
-	// Check if vmx24 is sane. 
-	"addi %[offset], %[offset], 16    \n\t" 
-	"lvx  0, %[offset], %[vmx_correct_value] \n\t" 
-	"vcmpequb. 0, 0, 24               \n\t" 
+	"bc 4, 24, %l[_value_mismatch]    \n\t"
+
+	// Check if vmx24 is sane.
+	"addi %[offset], %[offset], 16    \n\t"
+	"lvx  0, %[offset], %[vmx_correct_value] \n\t"
+	"vcmpequb. 0, 0, 24               \n\t"
 	"mfvrd 5, 24 \n\t"
 	"li     6, 24 \n\t"
-	"bc 4, 24, %l[_value_mismatch]    \n\t" 
-	
-	// Check if vmx25 is sane. 
-	"addi %[offset], %[offset], 16    \n\t" 
-	"lvx  0, %[offset], %[vmx_correct_value] \n\t" 
-	"vcmpequb. 0, 0, 25               \n\t" 
+	"bc 4, 24, %l[_value_mismatch]    \n\t"
+
+	// Check if vmx25 is sane.
+	"addi %[offset], %[offset], 16    \n\t"
+	"lvx  0, %[offset], %[vmx_correct_value] \n\t"
+	"vcmpequb. 0, 0, 25               \n\t"
 	"mfvrd 5, 25 \n\t"
 	"li     6, 25 \n\t"
-	"bc 4, 24, %l[_value_mismatch]    \n\t" 
-	
-	// Check if vmx26 is sane. 
-	"addi %[offset], %[offset], 16    \n\t" 
-	"lvx  0, %[offset], %[vmx_correct_value] \n\t" 
-	"vcmpequb. 0, 0, 26               \n\t" 
+	"bc 4, 24, %l[_value_mismatch]    \n\t"
+
+	// Check if vmx26 is sane.
+	"addi %[offset], %[offset], 16    \n\t"
+	"lvx  0, %[offset], %[vmx_correct_value] \n\t"
+	"vcmpequb. 0, 0, 26               \n\t"
 	"mfvrd 5, 26 \n\t"
 	"li     6, 26 \n\t"
-	"bc 4, 24, %l[_value_mismatch]    \n\t" 
-	
-	// Check if vmx27 is sane. 
-	"addi %[offset], %[offset], 16    \n\t" 
-	"lvx  0, %[offset], %[vmx_correct_value] \n\t" 
-	"vcmpequb. 0, 0, 27                \n\t" 
+	"bc 4, 24, %l[_value_mismatch]    \n\t"
+
+	// Check if vmx27 is sane.
+	"addi %[offset], %[offset], 16    \n\t"
+	"lvx  0, %[offset], %[vmx_correct_value] \n\t"
+	"vcmpequb. 0, 0, 27                \n\t"
 	"mfvrd 5, 27 \n\t"
 	"li     6, 27 \n\t"
-	"bc 4, 24, %l[_value_mismatch]    \n\t" 
-	
-	// Check if vmx28 is sane. 
-	"addi %[offset], %[offset], 16    \n\t" 
-	"lvx  0, %[offset], %[vmx_correct_value] \n\t" 
-	"vcmpequb. 0, 0, 28               \n\t" 
+	"bc 4, 24, %l[_value_mismatch]    \n\t"
+
+	// Check if vmx28 is sane.
+	"addi %[offset], %[offset], 16    \n\t"
+	"lvx  0, %[offset], %[vmx_correct_value] \n\t"
+	"vcmpequb. 0, 0, 28               \n\t"
 	"mfvrd 5, 28 \n\t"
 	"li     6, 28 \n\t"
-	"bc 4, 24, %l[_value_mismatch]    \n\t" 
-	
-	// Check if vmx29 is sane. 
-	"addi %[offset], %[offset], 16    \n\t" 
-	"lvx  0, %[offset], %[vmx_correct_value] \n\t" 
-	"vcmpequb. 0, 0, 29               \n\t" 
+	"bc 4, 24, %l[_value_mismatch]    \n\t"
+
+	// Check if vmx29 is sane.
+	"addi %[offset], %[offset], 16    \n\t"
+	"lvx  0, %[offset], %[vmx_correct_value] \n\t"
+	"vcmpequb. 0, 0, 29               \n\t"
 	"mfvrd 5, 29 \n\t"
 	"li     6, 29 \n\t"
-	"bc 4, 24, %l[_value_mismatch]    \n\t" 
-	
-	// Check if vmx30 is sane. 
-	"addi %[offset], %[offset], 16    \n\t" 
-	"lvx  0, %[offset], %[vmx_correct_value] \n\t" 
-	"vcmpequb. 0, 0, 30               \n\t" 
+	"bc 4, 24, %l[_value_mismatch]    \n\t"
+
+	// Check if vmx30 is sane.
+	"addi %[offset], %[offset], 16    \n\t"
+	"lvx  0, %[offset], %[vmx_correct_value] \n\t"
+	"vcmpequb. 0, 0, 30               \n\t"
 	"mfvrd 5, 30 \n\t"
 	"li     6, 30 \n\t"
-	"bc 4, 24, %l[_value_mismatch]    \n\t" 
-	
-	// Check if vmx31 is sane. 
-	"addi %[offset], %[offset], 16    \n\t" 
-	"lvx  0, %[offset], %[vmx_correct_value] \n\t" 
-	"vcmpequb. 0, 0, 31               \n\t" 
+	"bc 4, 24, %l[_value_mismatch]    \n\t"
+
+	// Check if vmx31 is sane.
+	"addi %[offset], %[offset], 16    \n\t"
+	"lvx  0, %[offset], %[vmx_correct_value] \n\t"
+	"vcmpequb. 0, 0, 31               \n\t"
 	"mfvrd 5, 31 \n\t"
 	"li     6, 31 \n\t"
-	"bc 4, 24, %l[_value_mismatch]    \n\t" 
-	
-	// Reach here, then all registers are sane. 
-	"b  %l[_value_match]              \n\t" 
-	
-	   : // no output 
-	   : [offset] "r"(offset), 
-	     [vmx_correct_value] "r"(vmx_correct_value), 
+	"bc 4, 24, %l[_value_mismatch]    \n\t"
+
+	// Reach here, then all registers are sane.
+	"b  %l[_value_match]              \n\t"
+
+	   : // no output
+	   : [offset] "r"(offset),
+	     [vmx_correct_value] "r"(vmx_correct_value),
 	     [vmx_scratch_area]  "r"(vmx_scratch_area),
 	     [vrsave_correct_value] "r"(vrsave_correct_value)
 	   : "memory", "r5", "r6"
