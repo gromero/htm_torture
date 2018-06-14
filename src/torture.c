@@ -118,6 +118,9 @@ int main(int argc, char **argv) {
 		}
 	}
 
+	if (infinityrun && runworkload == UNINIT)
+		runworkload = ALL;
+
 	if (runworkload == UNINIT) {
 		printf("HTM torture\n");
 		printf(" -a	: Run all workloads\n");
