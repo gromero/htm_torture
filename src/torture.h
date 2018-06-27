@@ -50,10 +50,10 @@ pthread_t thread_pool[THREADS*MAX_WORKLOADS*4096];
 uint64_t  num_used_threads;
 
 // Workload type
-#define UNINIT 0
-#define FAIL 1
-#define NON_FAIL 2
-#define ALL 3
+#define UNINIT -1
+#define FAIL -2
+#define NON_FAIL -3
+#define ALL -4
 
 
 void init_workers(void);
