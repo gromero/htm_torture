@@ -6,8 +6,8 @@ SRC = src
 
 CFLAGS += $(DEBUG)
 
-torture: $(SRC)/worker.o $(SRC)/torture.o $(SRC)/workload.o $(SRC)/threads.o $(SRC)/signal.o
-	$(CC) $(DEBUG) -o torture $(SRC)/worker.o $(SRC)/torture.o $(SRC)/workload.o $(SRC)/threads.o $(SRC)/signal.o $(LDFLAGS)
+torture: $(SRC)/worker.o $(SRC)/torture.o $(SRC)/workload.o $(SRC)/threads.o $(SRC)/signal.o $(SRC)/qs.o
+	$(CC) $(DEBUG) -o torture $(SRC)/worker.o $(SRC)/torture.o $(SRC)/workload.o $(SRC)/threads.o $(SRC)/signal.o $(SRC)/qs.o $(LDFLAGS)
 
 all: torture
 

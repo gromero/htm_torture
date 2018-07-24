@@ -17,6 +17,7 @@
 #include "torture.h"
 
 unsigned long *array;
+extern void QuickSort(unsigned long *a, int left, int right);
 
 /* Abort due to syscall (printf); */
 void workload0()
@@ -98,65 +99,6 @@ void workload6()
 }
 
 /*** workdload7 ***/
-
-
-void Swap(unsigned long *a, unsigned long *b)
-{
-        int temp;
-        temp = *a;
-        *a = *b;
-        *b = temp;
-}
-
-void PartitionArray(unsigned long *a, int left, int right, int *PivotLoc)
-{
-        *PivotLoc = left;
-
-        while(1)
-        {
-                while(*(a+(*PivotLoc)) <= *(a+right) && *PivotLoc != right)
-                {
-                        right--;
-                }
-                if(*PivotLoc == right)
-                {
-                        break;
-                }
-                else if(*(a+(*PivotLoc)) > *(a+right))
-                {
-                        Swap((a+(*PivotLoc)), (a+right));
-                        *PivotLoc = right;
-                        left++;
-                }
-
-                while(*(a+(*PivotLoc)) >= *(a+left) && *PivotLoc != left)
-                {
-                        left++;
-                }
-                if(*PivotLoc == left)
-                {
-                        break;
-                }
-                else if(*(a+(*PivotLoc)) < *(a+left))
-                {
-                        Swap((a+(*PivotLoc)), (a+left));
-                        *PivotLoc = left;
-                        right--;
-                }
-        } // end while(1)
-}
-
-void QuickSort(unsigned long *a, int left, int right)
-{
-        if (left < right)
-        {
-                int PivotLoc;
-                PartitionArray(a, left, right, &PivotLoc);
-                QuickSort(a, left, PivotLoc-1);
-                QuickSort(a, PivotLoc+1, right);
-        }
-}
-
 void utpsm_qsort()
 {
         QuickSort(array, 0, ARRAY_SIZE-1);
