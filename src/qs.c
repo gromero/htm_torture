@@ -75,27 +75,3 @@ void QuickSort(unsigned long *a, int left, int right)
                 QuickSort(a, PivotLoc+1, right);
         }
 }
-
-int main()
-{
- array = (unsigned long *) calloc(ARRAY_SIZE, sizeof(unsigned long));
-
- // Fill array with pseudo-random values.
- for (int i = 0; i < ARRAY_SIZE; i++)
-   array[i] = rand();
-
- // Print array.
- for (int i = 0; i < ARRAY_SIZE; i++)
-   printf("%ld\n", array[i]);
-
- printf("===========================================================\n");
-
- // Order array.
- QuickSort(array,0, ARRAY_SIZE-1);
-
- // Print ordered array.
- for (int i = 0; i < ARRAY_SIZE; i++)
-   printf("%ld\n", array[i]);
-
- exit(0);
-}
