@@ -17,7 +17,8 @@
 
 void *worker(void *arg)
 {
-	uint64_t workload = (int) arg; // I know you will frown upon void * to int cast ;-)
+	// I know you will frown upon void * to int cast ;-)
+	uint64_t workload = (int) arg;
 
 	uint64_t nr;
 	uint64_t res;
@@ -103,13 +104,19 @@ void *worker(void *arg)
 	vmx_correct_value[31] = (vector __int128) {0xBEEF};
 
 	// Expected correct value restored to VRSAVE after a HTM failure.
-	uint64_t vrsave_correct_value[1];     // A place to keep the correct value in memory
-	vrsave_correct_value[0] = 0xBABEBEEF; // The correct value itself, a 32-bit value
+	// A place to keep the correct value in memory
+	uint64_t vrsave_correct_value[1];
 
-	// Set values for each VMX register just before entering in a transactional block.
-	// Values below must match the expected correct values after a HTM failure,
-	// as specified in the code section above. TODO: add random generated value as
-	// the expected correct values to torture kernel VMX restore code.
+	// The correct value itself, a 32-bit value
+	vrsave_correct_value[0] = 0xBABEBEEF;
+
+	// Set values for each VMX register just before entering in a
+	// transactional block.  Values below must match the expected correct
+	// values after a HTM failure, as specified in the code section above.
+
+	// TODO: add random generated value as the expected correct values to
+	// torture kernel VMX restore code.
+
 	vmx0  = (vector __int128) {0xBEEF};
 	vmx1  = (vector __int128) {0xBEEF};
 	vmx2  = (vector __int128) {0xBEEF};
@@ -151,9 +158,6 @@ void *worker(void *arg)
 	   : "r5"
 	  );
 
-
-
-
 	/***************
 	 ** HTM BEGIN **
 	****************/
@@ -164,7 +168,8 @@ void *worker(void *arg)
 	 ** HTM BODY **
 	 **************/
 
-	// Mess with the VRSAVE using a random value taken from Time Base register.
+	// Mess with the VRSAVE using a random value taken from Time Base
+	// register.
 	_ ("mftb     5    \n\t"
 	   "mtvrsave 5    \n\t"
 	   :
@@ -512,7 +517,8 @@ _value_mismatch:
 	printf(": Workload: %ld\n\n", workload);
 
        _ (".long 0"); // exit with a core dump
-        // TODO: move 'nr' and 'res' to input list in inline asm above and remove from here.
+	// TODO: move 'nr' and 'res' to input list in inline asm above and
+	// remove from here.
 	_ ("mr %[nr], 6 \n\t": [nr] "=r"(nr) : :);
 	_ ("mr %[res], 5 \n\t": [res] "=r"(res) : :);
 

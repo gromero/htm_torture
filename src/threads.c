@@ -20,7 +20,8 @@ void reinit_workers(void) {
 void start_workers(uint64_t workload, uint64_t nr_workers)
 {
 	for (uint64_t i = 0; i < nr_workers; i++) {
-		pthread_create(&thread_pool[num_used_threads], NULL, &worker, (void *) workload);
+		pthread_create(&thread_pool[num_used_threads],
+			 NULL, &worker, (void *) workload);
 		num_used_threads++;
 	}
 }

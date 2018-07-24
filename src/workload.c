@@ -16,13 +16,17 @@
 #include<inttypes.h>
 #include "torture.h"
 
+unsigned long *array;
+
 /* Abort due to syscall (printf); */
-void workload0() {
+void workload0()
+{
 	printf("Workload 0\n");
 }
 
-/* ----------- */
-int fib(int x){
+/* Simple fibonnaci function */
+int fib(int x)
+{
 	if (x == 2 || x == 1)
 		return 1;
 
@@ -37,66 +41,64 @@ void workload1() {
 	sum = fib(n);
 }
 
-/* ----------- */
 /* single nop  inside a transaction */
 void workload2() {
 	_ ("or 0,0,0 \n");
 }
 
-/* ----------- */
 /* Calling tabort inside transaction */
 void workload3() {
 	_ ("tabort.  0\n");
 }
 
-/* ----------- */
 /* Quick sort workload */
 void quicksort(int *A, int len)
 {
-  if (len < 2) return;
+	int pivot = A[len / 2];
+	int i, j;
+	int temp;
+
+  	if (len < 2) return;
+
+	for (i = 0, j = len - 1; ; i++, j--) {
+		while (A[i] < pivot) i++;
+		while (A[j] > pivot) j--;
+
+		if (i >= j) break;
+
+		temp = A[i];
+		A[i]     = A[j];
+		A[j]     = temp;
+	}
  
-  int pivot = A[len / 2];
- 
-  int i, j;
-  for (i = 0, j = len - 1; ; i++, j--)
-  {
-    while (A[i] < pivot) i++;
-    while (A[j] > pivot) j--;
- 
-    if (i >= j) break;
- 
-    int temp = A[i];
-    A[i]     = A[j];
-    A[j]     = temp;
-  }
- 
-  quicksort(A, i);
-  quicksort(A + i, len - i);
+	quicksort(A, i);
+	quicksort(A + i, len - i);
 }
 
-/* ----------- */
-void workload4() {
+/* Quicksort workload */
+void workload4()
+{
 	int a[] = {12, 3}; //, 9, 4, 9, 64};
 	int n = sizeof a / sizeof a[0];
 	quicksort(a, n);
 }
 
-/* ----------- */
 /* loop */
-void workload5() {
+void workload5()
+{
 	int i ;
 	for (i=0; i < 10; )
 		i++;
 }
 
 // Infinite loop.
-void workload6() {
+void workload6()
+{
 	while(1);
 }
 
 /*** workdload7 ***/
 
-unsigned long *array;
 
 void Swap(unsigned long *a, unsigned long *b)
 {
@@ -146,7 +148,7 @@ void PartitionArray(unsigned long *a, int left, int right, int *PivotLoc)
 
 void QuickSort(unsigned long *a, int left, int right)
 {
-        if(left < right)
+        if (left < right)
         {
                 int PivotLoc;
                 PartitionArray(a, left, right, &PivotLoc);
@@ -162,15 +164,17 @@ void utpsm_qsort()
 
 // illegal instruction.
 void workload8() {
-  _ (".long 0x0");
+	_ (".long 0x0");
 }
 
 // trap
-void workload9() {
-  _ ("trap");
+void workload9()
+{
+	_ ("trap");
 }
 
-void workload10() {
-  _ ("mfdscr 9");
-  _ ("mtdscr 9");
+void workload10()
+{
+	_ ("mfdscr 9");
+	_ ("mtdscr 9");
 }
