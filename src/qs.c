@@ -21,58 +21,57 @@ unsigned long *array;
 
 void Swap(unsigned long *a, unsigned long *b)
 {
-        int temp;
+	int temp;
 
-        temp = *a;
-        *a = *b;
-        *b = temp;
+	temp = *a;
+	*a = *b;
+	*b = temp;
 }
 
 void PartitionArray(unsigned long *a, int left, int right, int *PivotLoc)
 {
-        *PivotLoc = left;
+	*PivotLoc = left;
 
-        while(1)
-        {
-                while(*(a+(*PivotLoc)) <= *(a+right) && *PivotLoc != right)
-                {
-                        right--;
-                }
-                if(*PivotLoc == right)
-                {
-                        break;
-                }
-                else if(*(a+(*PivotLoc)) > *(a+right))
-                {
-                        Swap((a+(*PivotLoc)), (a+right));
-                        *PivotLoc = right;
-                        left++;
-                }
+	while(1)
+	{
+		while(*(a+(*PivotLoc)) <= *(a+right) && *PivotLoc != right)
+		{
+			right--;
+		}
+		if(*PivotLoc == right)
+		{
+			break;
+		}
+		else if(*(a+(*PivotLoc)) > *(a+right))
+		{
+			Swap((a+(*PivotLoc)), (a+right));
+			*PivotLoc = right;
+			left++;
+		}
 
-                while(*(a+(*PivotLoc)) >= *(a+left) && *PivotLoc != left)
-                {
-                        left++;
-                }
-                if(*PivotLoc == left)
-                {
-                        break;
-                }
-                else if(*(a+(*PivotLoc)) < *(a+left))
-                {
-                        Swap((a+(*PivotLoc)), (a+left));
-                        *PivotLoc = left;
-                        right--;
-                }
-        } // end while(1)
+		while(*(a+(*PivotLoc)) >= *(a+left) && *PivotLoc != left)
+		{
+			left++;
+		}
+		if(*PivotLoc == left)
+		{
+			break;
+		}
+		else if(*(a+(*PivotLoc)) < *(a+left)) {
+			Swap((a+(*PivotLoc)), (a+left));
+			*PivotLoc = left;
+			right--;
+		}
+	} // end while(1)
 }
 
 void QuickSort(unsigned long *a, int left, int right)
 {
-        if (left < right) {
-                int PivotLoc;
+	if (left < right) {
+		int PivotLoc;
 
-                PartitionArray(a, left, right, &PivotLoc);
-                QuickSort(a, left, PivotLoc-1);
-                QuickSort(a, PivotLoc+1, right);
-        }
+		PartitionArray(a, left, right, &PivotLoc);
+		QuickSort(a, left, PivotLoc-1);
+		QuickSort(a, PivotLoc+1, right);
+	}
 }

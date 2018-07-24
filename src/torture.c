@@ -53,10 +53,10 @@ void set_workloads()
 	// workloads like that.
 	array = (unsigned long *) calloc(ARRAY_SIZE, sizeof(unsigned long));
 
-        // Fill array with pseudo-random values.
-        for (uint64_t i = 0; i < ARRAY_SIZE; i++) array[i] = rand();
+	// Fill array with pseudo-random values.
+	for (uint64_t i = 0; i < ARRAY_SIZE; i++) array[i] = rand();
 
-        // Order array.
+	// Order array.
 	register_workload(utpsm_qsort, "utpsm_qsort");
 
 	register_workload(workload8, "illegal instruction");
@@ -70,12 +70,12 @@ int main(int argc, char **argv)
 {
 	int runworkload = UNINIT;
 	int infinityrun = 0;
-        int nr_threads = THREADS;
+	int nr_threads = THREADS;
 	int i;
 	// Parse opt
 	int opt;
 	// Install signal handler for all threads.
-        struct sigaction sa;
+	struct sigaction sa;
 
 	// Debug initially disabled
 	debug = 0;
