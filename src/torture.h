@@ -23,17 +23,17 @@
 // Thi is the array pointer to be ordered by worload7: uptsm_qsort.
 extern unsigned long *array;
 
-extern void workload0();
-extern void workload1();
-extern void workload2();
-extern void workload3();
-extern void workload4();
-extern void workload5();
-extern void workload6();
+extern void scall();
+extern void fibonacci();
+extern void nop();
+extern void tabort();
+extern void ownqsort();
+extern void loop();
+extern void iloop();
 extern void utpsm_qsort();
-extern void workload8();
-extern void workload9();
-extern void workload10();
+extern void illegal();
+extern void trap();
+extern void dscr();
 
 // Array of workloads functions
 void (*workloads[MAX_WORKLOADS])();

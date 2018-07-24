@@ -19,8 +19,8 @@
 unsigned long *array;
 extern void QuickSort(unsigned long *a, int left, int right);
 
-/* Abort due to syscall (printf); */
-void workload0()
+/* Abort due to syscall (write); */
+void scall()
 {
 	printf("Workload 0\n");
 }
@@ -35,7 +35,7 @@ int fib(int x)
 }
 
 /* Run a fibonnaci of 40 inside transaction */
-void workload1() {
+void fibonacci() {
 	int sum __attribute__((unused));
 	int n = 40;
 
@@ -43,12 +43,12 @@ void workload1() {
 }
 
 /* single nop  inside a transaction */
-void workload2() {
+void nop() {
 	_ ("or 0,0,0 \n");
 }
 
 /* Calling tabort inside transaction */
-void workload3() {
+void tabort() {
 	_ ("tabort.  0\n");
 }
 
@@ -77,7 +77,7 @@ void quicksort(int *A, int len)
 }
 
 /* Quicksort workload */
-void workload4()
+void ownqsort()
 {
 	int a[] = {12, 3}; //, 9, 4, 9, 64};
 	int n = sizeof a / sizeof a[0];
@@ -85,7 +85,7 @@ void workload4()
 }
 
 /* loop */
-void workload5()
+void loop()
 {
 	int i ;
 	for (i=0; i < 10; )
@@ -93,7 +93,7 @@ void workload5()
 }
 
 // Infinite loop.
-void workload6()
+void iloop()
 {
 	while(1);
 }
@@ -105,17 +105,17 @@ void utpsm_qsort()
 }
 
 // illegal instruction.
-void workload8() {
+void illegal() {
 	_ (".long 0x0");
 }
 
 // trap
-void workload9()
+void trap()
 {
 	_ ("trap");
 }
 
-void workload10()
+void dscr()
 {
 	_ ("mfdscr 9");
 	_ ("mtdscr 9");

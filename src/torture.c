@@ -41,13 +41,13 @@ void set_workloads()
 	memset(workloads, 0, MAX_WORKLOADS*sizeof(void *));
 	nr_workloads = 0;
 
-	register_workload(workload0, "syscall");
-	register_workload(workload1, "recursion");
-	register_workload(workload2, "nop");
-	register_workload(workload3, "tabort.");
-	register_workload(workload4, "quicksort");
-	register_workload(workload5, "loop");
-	register_workload(workload6, "infite loop");
+	register_workload(scall, "syscall");
+	register_workload(fibonacci, "recursion");
+	register_workload(nop, "nop");
+	register_workload(tabort, "tabort.");
+	register_workload(ownqsort, "quicksort");
+	register_workload(loop, "loop");
+	register_workload(iloop, "infite loop");
 	
 	// Preparation for workload7. TODO: improve argument passing to
 	// workloads like that.
@@ -59,9 +59,9 @@ void set_workloads()
 	// Order array.
 	register_workload(utpsm_qsort, "utpsm_qsort");
 
-	register_workload(workload8, "illegal instruction");
-	register_workload(workload9, "trap");
-	register_workload(workload10, "dscr");
+	register_workload(illegal, "illegal instruction");
+	register_workload(trap, "trap");
+	register_workload(dscr, "dscr");
 
         printf("\n");
 }
