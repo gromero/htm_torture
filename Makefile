@@ -1,5 +1,6 @@
+GCC = gcc
 LDFLAGS = -lpthread
-CC = gcc -Wno-pointer-to-int-cast -Wall
+CC = $(GCC) -Wno-pointer-to-int-cast -Wall -maltivec -mcpu=power8
 DEBUG = -O0 -g
 SRC = src
 
