@@ -13,8 +13,6 @@ all: torture
 
 clean:
 	rm -f $(SRC)/*.o
-	rm -f a.out
-	rm -f z
 	rm -fr torture
 	rm -fr cscope*
 

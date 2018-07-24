@@ -4,4 +4,4 @@ This test runs on many threads, and check if the VMX states are being recovered 
 
 ## Supported OSes:
  * Linux
- * FreeBSD (WIP)
+ * FreeBSD
