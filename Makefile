@@ -1,18 +1,20 @@
 GCC = gcc
 LDFLAGS = -lpthread
-CC = $(GCC) -Wno-pointer-to-int-cast -Wall -maltivec -mcpu=power8
+CC = gcc
 DEBUG = -O0 -g
+CFLAGS += $(DEBUG) -Wno-pointer-to-int-cast -Wall -lpthread -maltivec -mcpu=power8
 SRC = src
 
-CFLAGS += $(DEBUG)
+OBJS = worker.o torture.o workload.o threads.o signal.o qs.o
 
-torture: $(SRC)/worker.o $(SRC)/torture.o $(SRC)/workload.o $(SRC)/threads.o $(SRC)/signal.o $(SRC)/qs.o
-	$(CC) $(DEBUG) -o torture $(SRC)/worker.o $(SRC)/torture.o $(SRC)/workload.o $(SRC)/threads.o $(SRC)/signal.o $(SRC)/qs.o $(LDFLAGS)
+%.o: $(SRC)/%.c
+	$(CC) -c -o $@ $< $(CFLAGS)
 
-all: torture
+torture: $(OBJS)
+	$(CC) -o $@ $^ $(CFLAGS)
 
 clean:
-	rm -f $(SRC)/*.o
+	rm -f $(OBJS)
 	rm -fr torture
 	rm -fr cscope*
 
