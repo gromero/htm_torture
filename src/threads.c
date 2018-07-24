@@ -14,7 +14,7 @@
  */
 #include "torture.h"
 void reinit_workers(void) {
-	num_used_threads=0;
+	num_used_threads = 0;
 }
 
 void start_workers(uint64_t workload, uint64_t nr_workers)

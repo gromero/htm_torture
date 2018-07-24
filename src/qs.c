@@ -22,6 +22,7 @@ unsigned long *array;
 void Swap(unsigned long *a, unsigned long *b)
 {
         int temp;
+
         temp = *a;
         *a = *b;
         *b = temp;
@@ -67,9 +68,9 @@ void PartitionArray(unsigned long *a, int left, int right, int *PivotLoc)
 
 void QuickSort(unsigned long *a, int left, int right)
 {
-        if(left < right)
-        {
+        if (left < right) {
                 int PivotLoc;
+
                 PartitionArray(a, left, right, &PivotLoc);
                 QuickSort(a, left, PivotLoc-1);
                 QuickSort(a, PivotLoc+1, right);

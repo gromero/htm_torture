@@ -57,11 +57,11 @@ void set_workloads()
         for (uint64_t i = 0; i < ARRAY_SIZE; i++) array[i] = rand();
 
         // Order array.
-	register_workload(utpsm_qsort, "utpsm_qsort");       // utpsm_qsort
+	register_workload(utpsm_qsort, "utpsm_qsort");
 
-	register_workload(workload8, "illegal instruction"); // illegal instruction
-	register_workload(workload9, "trap");                // trap
-	register_workload(workload10, "dscr");                // dscr load restore
+	register_workload(workload8, "illegal instruction");
+	register_workload(workload9, "trap");
+	register_workload(workload10, "dscr");
 
         printf("\n");
 }
@@ -70,7 +70,8 @@ int main(int argc, char **argv)
 {
 	int runworkload = UNINIT;
 	int infinityrun = 0;
-        int nr_threads =  THREADS;
+        int nr_threads = THREADS;
+	int i;
 	// Parse opt
 	int opt;
 	// Install signal handler for all threads.
@@ -115,7 +116,8 @@ int main(int argc, char **argv)
 				list_workloads();
 				exit(2);
 			}
-			printf("Running just workload %d (%s) \n", w, (char *) &wname[w]);
+			printf("Running just workload %d (%s) \n", w,
+					 (char *) &wname[w]);
 			runworkload = atoi(optarg);
 		} else if (opt == 'a') {
 			printf("Running all workloads\n");
@@ -147,17 +149,8 @@ int main(int argc, char **argv)
 	do {
 		if (runworkload == ALL) {
 			printf("Starting all workloads\n");
-			start_workers(0, nr_threads);
-			start_workers(1, nr_threads);
-			start_workers(2, nr_threads);
-			start_workers(3, nr_threads);
-			start_workers(4, nr_threads);
-			start_workers(5, nr_threads);
-			start_workers(6, nr_threads);
-			start_workers(7, nr_threads);
-			start_workers(8, nr_threads);
-			start_workers(9, nr_threads);
-			start_workers(10, nr_threads);
+			for (i = 0 ; i <= nr_workloads ; i++)
+				start_workers(i, nr_threads);
 		} else if (runworkload == FAIL) {
 			printf("Starting workloads which the transactions will fail\n");
 			start_workers(0, nr_threads);
@@ -176,6 +169,7 @@ int main(int argc, char **argv)
 		} else {
 			start_workers(runworkload, nr_threads);
 		}
+
 		join_workers();
 	} while (infinityrun);
 
@@ -184,7 +178,10 @@ int main(int argc, char **argv)
 		printf("TM fails  : %ld\n", tm_fails);
 		printf("TM commits: %ld\n", tm_commit);
 	}
+
 	printf("Fail Percentage: %1.2f %% \n",
 		(float) 100*tm_fails/(tm_fails + tm_commit));
 
+
+	return (0);
 }
