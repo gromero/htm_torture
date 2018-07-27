@@ -47,7 +47,7 @@ long tm_commit;
 int debug;
 
 pthread_t thread_pool[THREADS*MAX_WORKLOADS*4096];
-uint64_t  num_used_threads;
+uint64_t num_used_threads;
 
 // Workload type
 #define UNINIT -1

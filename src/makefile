@@ -1,5 +1,5 @@
 # $FreeBSD$
-# FreeBSD Makefile 
+# FreeBSD Makefile
 
 PROG = torture
 CFLAGS += -Wno-pointer-to-int-cast -Wall -maltivec -mcpu=power8
