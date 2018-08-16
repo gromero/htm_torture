@@ -17,6 +17,9 @@
 #define REPEAT 1
 #define MAX_WORKLOADS 20
 
+#define SUSP_RANDOM 1
+#define SUSP_ALWAYS 2
+
 // This is the array size to be ordered by workload7: uptsm_qsort.
 #define ARRAY_SIZE 64
 
@@ -45,6 +48,7 @@ int nr_workloads;
 long tm_fails;
 long tm_commit;
 int debug;
+int susp;
 
 pthread_t thread_pool[THREADS*MAX_WORKLOADS*4096];
 uint64_t  num_used_threads;

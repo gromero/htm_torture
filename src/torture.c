@@ -95,7 +95,7 @@ int main(int argc, char **argv)
 
 	set_workloads();
 
-	while ((opt = getopt(argc, argv, "vcfials:n:")) != -1) {
+	while ((opt = getopt(argc, argv, "vcfizZals:n:")) != -1) {
 		if (opt == 'l') {
 			//List all options
 			printf("Listing all workloads\n");
@@ -124,6 +124,10 @@ int main(int argc, char **argv)
 			runworkload = ALL;
 		} else if (opt == 'n') {
 			nr_threads = atoi(optarg);
+		} else if (opt == 'Z') {
+			susp = SUSP_ALWAYS;
+		} else if (opt == 'z') {
+			susp = SUSP_RANDOM;
 		}
 	}
 
@@ -139,6 +143,7 @@ int main(int argc, char **argv)
 		printf(" -n	: Amount of threads\n");
 		printf(" -c	: Only workloads that commit\n");
 		printf(" -f	: Only workloads that fails\n");
+		printf(" -z	: Suspend some transactions\n");
 		printf(" -v	: Be verbose\n");
 		exit(1);
 	}

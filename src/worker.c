@@ -19,6 +19,7 @@ void *worker(void *arg)
 {
 	// I know you will frown upon void * to int cast ;-)
 	uint64_t workload = (int) arg;
+	int r;
 
 	uint64_t nr;
 	uint64_t res;
@@ -150,6 +151,16 @@ void *worker(void *arg)
 	vmx30 = (vector __int128) {0xBEEF};
 	vmx31 = (vector __int128) {0xBEEF};
 
+	if (susp == SUSP_RANDOM)
+		r = rand() % 2;
+	else if (susp == SUSP_ALWAYS) {
+		r = 1;
+	}
+	else {
+		r = 0;
+	}
+
+
 	// Set value for VRSAVE register just before entering in HTM block.
 	_ ("lwz 5, 0(%[vrsave_correct_value]) \n\t"
 	   "mtvrsave 5                        \n\t"
@@ -164,6 +175,9 @@ void *worker(void *arg)
 	_ ("tbegin.  \n\t");
 	_ goto ("beq %l[_failure] \n\t" : : : : _failure);
 
+	/* Suspend half of the transactions */
+	if (r == 1)
+		_ ("tsuspend.	\n\t");
 	/**************
 	 ** HTM BODY **
 	 **************/
