@@ -144,6 +144,7 @@ int main(int argc, char **argv)
 		printf(" -c	: Only workloads that commit\n");
 		printf(" -f	: Only workloads that fails\n");
 		printf(" -z	: Suspend some transactions\n");
+		printf(" -Z	: Suspend all transactions\n");
 		printf(" -v	: Be verbose\n");
 		exit(1);
 	}
