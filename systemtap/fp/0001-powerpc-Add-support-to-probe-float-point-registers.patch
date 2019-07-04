@@ -1,0 +1,114 @@
+From 053658c77ff0be323bfb5acb6dfb0cd49d338289 Mon Sep 17 00:00:00 2001
+From: Gustavo Romero <gromero@2q14gto1.aus.stglabs.ibm.com>
+Date: Thu, 4 Jul 2019 11:15:01 -0500
+Subject: [PATCH] powerpc: Add support to probe float-point registers
+
+---
+ tapset/powerpc/registers.stp | 67 +++++++++++++++++++++++++++++++++++++++++---
+ 1 file changed, 63 insertions(+), 4 deletions(-)
+
+diff --git a/tapset/powerpc/registers.stp b/tapset/powerpc/registers.stp
+index 3ac9ea647..b97eb3eee 100644
+--- a/tapset/powerpc/registers.stp
++++ b/tapset/powerpc/registers.stp
+@@ -1,6 +1,11 @@
++%{
++/* For giveup_all() prototype */
++#include <asm/switch_to.h>
++%}
++
+ /* Dwarfless register access for powerpc */
+ 
+-@__private30 global _reg_offsets[44]
++@__private30 global _reg_offsets[76]
+ 
+ probe init {
+ 	/* Same order as pt_regs */
+@@ -49,6 +54,40 @@ probe init {
+ 	_reg_offsets["dsisr"] = 336
+ 	_reg_offsets["result"] = 344
+ 
++	/* Values below are arbitrary */
++	_reg_offsets["f0"] = 1000
++	_reg_offsets["f1"] = 1001
++	_reg_offsets["f2"] = 1002
++	_reg_offsets["f3"] = 1003
++	_reg_offsets["f4"] = 1004
++	_reg_offsets["f5"] = 1005
++	_reg_offsets["f6"] = 1006
++	_reg_offsets["f7"] = 1007
++	_reg_offsets["f8"] = 1008
++	_reg_offsets["f9"] = 1009
++	_reg_offsets["f10"] = 1010
++	_reg_offsets["f11"] = 1011
++	_reg_offsets["f12"] = 1012
++	_reg_offsets["f13"] = 1013
++	_reg_offsets["f14"] = 1014
++	_reg_offsets["f15"] = 1015
++	_reg_offsets["f16"] = 1016
++	_reg_offsets["f17"] = 1017
++	_reg_offsets["f18"] = 1018
++	_reg_offsets["f19"] = 1019
++	_reg_offsets["f20"] = 1020
++	_reg_offsets["f21"] = 1021
++	_reg_offsets["f22"] = 1022
++	_reg_offsets["f23"] = 1023
++	_reg_offsets["f24"] = 1024
++	_reg_offsets["f25"] = 1025
++	_reg_offsets["f26"] = 1026
++	_reg_offsets["f27"] = 1027
++	_reg_offsets["f28"] = 1028
++	_reg_offsets["f29"] = 1029
++	_reg_offsets["f30"] = 1030
++	_reg_offsets["f31"] = 1031
++
+ 	/*
+ 	 * If we ever need to support 32bit powerpc, we can
+ 	 * get to the register offsets by using just a
+@@ -72,20 +111,40 @@ function uarch_bytes:long() {
+ 
+ function _stp_get_register_by_offset:long (offset:long) %{ /* pure */
+ 	long value;
++	int is_core_reg, is_fp_reg;
+ 	struct pt_regs *regs;
+ 	regs = (CONTEXT->user_mode_p ? CONTEXT->uregs : CONTEXT->kregs);
+ 	if (!regs) {
+ 		CONTEXT->last_error = "No registers available in this context";
+ 		return;
+ 	}
+-	if (STAP_ARG_offset < 0 || STAP_ARG_offset > sizeof(struct pt_regs) - sizeof(long)) {
++
++	is_core_reg = STAP_ARG_offset >= 0 && STAP_ARG_offset < sizeof(struct pt_regs);
++	is_fp_reg = STAP_ARG_offset >= 1000 && STAP_ARG_offset <= 1031;
++
++	if (!is_core_reg && !is_fp_reg) {
+ 		snprintf(CONTEXT->error_buffer, sizeof(CONTEXT->error_buffer),
+-				"Bad register offset: %lld",
++				"Bad register offset or reference: %lld",
+ 				(long long)STAP_ARG_offset);
+ 		CONTEXT->last_error = CONTEXT->error_buffer;
+ 		return;
+ 	}
+-	memcpy(&value, ((char *)regs) + STAP_ARG_offset, sizeof(value));
++
++	if (is_fp_reg) {
++		/* Ensure fp regs are flushed correctly to the thread.
++		* It might be the case it haven't gone through __switch_to
++		* before hitting the stap probe so fp_state is not updated.
++		*/
++		giveup_all(current);
++
++		/* fpr are modeled as 128-bit as they overlap the vsx regs,
++		 * which are 128-bit, but only offset 1 (high doubleword) is
++		 * used for the fp registers.
++		 */
++		value = current->thread.fp_state.fpr[STAP_ARG_offset-1000][1];
++	} else { // is_core_reg
++		memcpy(&value, ((char *)regs) + STAP_ARG_offset, sizeof(value));
++	}
+ 	STAP_RETVALUE = value;
+ %}
+ 
+-- 
+2.11.0
+

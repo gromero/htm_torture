@@ -1,0 +1,70 @@
+/****
+
+Expected output for this probe:
+
+$ sudo ~/systemtap/bin/stap -B CONFIG_MODVERSIONS=y -d /lib/powerpc64le-linux-gnu/libc-2.24.so -g -k -v -r /home/gromero/git/linux -c "/home/gromero/fp_test" ./probe.stp
+Pass 1: parsed user script and 496 library scripts using 101760virt/89856res/7936shr/81600data kb, in 510usr/40sys/559real ms.
+WARNING: address 0x100008bc does not match the beginning of a statement (try 0x100008b4)
+WARNING: address 0x100008c4 does not match the beginning of a statement (try 0x100008b4)
+Pass 2: analyzed script: 5 probes, 8 functions, 1 embed, 1 global using 103872virt/94592res/9088shr/83712data kb, in 20usr/0sys/19real ms.
+Pass 3: translated to C into "/tmp/stapT31zng/stap_82460_src.c" using 109312virt/100288res/9408shr/89152data kb, in 130usr/1170sys/1304real ms.
+Pass 4: compiled C into "stap_82460.ko" in 4320usr/1610sys/5567real ms.
+Pass 5: starting run.
+a_func: 15
+
+ -- probe 0 @a_func.call
+0
+0
+0
+0
+ -- probe 1 @0x100008bc
+b00
+0
+0
+0
+ -- probe 2 @0x100008c4
+b00
+b01
+0
+0
+ -- probe 3 @0x100008d0
+b00
+b01
+bee
+0
+Pass 5: run completed in 0usr/90sys/1238real ms.
+Keeping temporary directory "/tmp/stapT31zng"
+
+*****/
+
+probe process("/home/gromero/fp_test").function("a_func").call {
+  printf(" -- probe 0 @a_func.call\n");
+  printf("%0lx\n", register("f0")); // f0 = 0x0
+  printf("%0lx\n", register("f1")); // f1 = 0x0
+  printf("%0lx\n", register("f2")); // f2 = 0x0
+  printf("%0lx\n", register("f3")); // f3 = 0x0
+}
+
+probe process("/home/gromero/fp_test").statement(0x100008bc) {
+  printf(" -- probe 1 @0x100008bc\n");
+  printf("%0lx\n", register("f0")); // f0 = 0x0
+  printf("%0lx\n", register("f1")); // f1 = 0x0
+  printf("%0lx\n", register("f2")); // f2 = 0x0
+  printf("%0lx\n", register("f3")); // f3 = 0x0
+}
+
+probe process("/home/gromero/fp_test").statement(0x100008c4) {
+  printf(" -- probe 2 @0x100008c4\n");
+  printf("%0lx\n", register("f0")); // f0 = 0xb00
+  printf("%0lx\n", register("f1")); // f1 = 0xb01
+  printf("%0lx\n", register("f2")); // f2 = 0x0
+  printf("%0lx\n", register("f3")); // f3 = 0x0
+}
+
+probe process("/home/gromero/fp_test").statement(0x100008d0) {
+  printf(" -- probe 3 @0x100008d0\n");
+  printf("%0lx\n", register("f0")); // f0 = 0xb00
+  printf("%0lx\n", register("f1")); // f1 = 0xb01
+  printf("%0lx\n", register("f2")); // f2 = 0xbee
+  printf("%0lx\n", register("f3")); // f3 = 0x0
+}
